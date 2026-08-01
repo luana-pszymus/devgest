@@ -1,0 +1,60 @@
+# Dependências
+
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Logs
+
+logs/
+*.log
+
+# Ambiente
+
+.env
+.env.*
+!.env.example
+
+# Build / produção
+
+dist/
+build/
+
+# Sistema operacional
+
+.DS_Store
+Thumbs.db
+
+# IDE / Editor
+
+.vscode/
+.idea/
+
+# Arquivos temporários
+
+tmp/
+temp/
+
+# Docker
+
+docker-compose.override.yml
+
+# Coverage / testes
+
+coverage/
+
+# Banco de dados local (se existir)
+
+*.sqlite
+*.db
+
+# Arquivos de cache
+
+.cache/
+.npm/
+
+# Node específico
+
+*.tsbuildinfo
