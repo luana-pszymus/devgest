@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 
 const consumoRoutes = require("./routes/consumoRoutes");
+const inquilinoRoutes = require("./routes/inquilinoRoutes");
 
 const app = express();
 app.use(cors());
@@ -19,5 +20,6 @@ app.get("/api/conteudo", consController.listarConten);
 
 //routes
 app.use("/api/consumo", consumoRoutes);
+app.use("/api/inquilino", inquilinoRoutes);
 
 module.exports = app;
