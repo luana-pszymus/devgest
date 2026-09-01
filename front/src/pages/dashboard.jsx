@@ -1,7 +1,15 @@
-import { useEffect, useState } from "react";
+import Navbar from '../components/Navbar';
 
-function Dashboard() {
-  return <h1>página inicial de teste</h1>;
+export default function Dashboard() {
+  return (
+    <div>
+      {/* Coloca o menu no topo */}
+      <Navbar />
+
+      <div style={{ padding: '20px' }}>
+        <h1>Painel das Kitnets</h1>
+        <p>Aqui você vê todas as suas kitnets!</p>
+      </div>
+    </div>
+  );
 }
-
-export default Dashboard;
