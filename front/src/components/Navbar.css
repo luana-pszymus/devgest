@@ -1,0 +1,154 @@
+/* =========================================
+   NAVBAR INFERIOR
+   ========================================= */
+
+.bottom-nav {
+  position: fixed;
+
+  bottom: 0;
+  left: 50%;
+
+  transform: translateX(-50%);
+
+  width: 100%;
+  max-width: 600px;
+
+  height: 76px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+
+  padding: 6px 8px;
+
+  background: #ffffff;
+
+  border-top: 1px solid #e4e8ec;
+
+  box-shadow: 0 -4px 16px rgba(25, 118, 210, 0.08);
+
+  z-index: 1000;
+}
+
+/* =========================================
+   ITEM
+   ========================================= */
+
+.nav-item {
+  position: relative;
+
+  width: 25%;
+  height: 64px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 4px;
+
+  border-radius: 12px;
+
+  color: #68737d;
+
+  font-size: 11px;
+  font-weight: 500;
+
+  transition:
+    background-color 0.2s ease,
+    transform 0.1s ease;
+}
+
+/* =========================================
+   ÍCONE
+   ========================================= */
+
+.nav-icon-wrapper {
+  width: 32px;
+  height: 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 10px;
+}
+
+.nav-icon {
+  width: 26px;
+  height: 26px;
+
+  object-fit: contain;
+
+  display: block;
+}
+
+/* =========================================
+   TEXTO
+   ========================================= */
+
+.nav-label {
+  line-height: 1;
+
+  white-space: nowrap;
+}
+
+/* =========================================
+   ITEM ATIVO
+   ========================================= */
+
+.nav-item.active {
+  color: #1976d2;
+
+  background: #eaf4ff;
+
+  font-weight: 700;
+}
+
+/* =========================================
+   INDICADOR SUPERIOR
+   ========================================= */
+
+.nav-item.active::before {
+  content: "";
+
+  position: absolute;
+
+  top: -6px;
+
+  width: 24px;
+  height: 3px;
+
+  border-radius: 0 0 4px 4px;
+
+  background: #1976d2;
+}
+
+/* =========================================
+   TOQUE
+   ========================================= */
+
+.nav-item:active {
+  transform: scale(0.96);
+}
+
+/* =========================================
+   TELAS PEQUENAS
+   ========================================= */
+
+@media (max-width: 380px) {
+  .bottom-nav {
+    height: 72px;
+  }
+
+  .nav-item {
+    height: 60px;
+
+    font-size: 10px;
+  }
+
+  .nav-icon {
+    width: 24px;
+    height: 24px;
+  }
+}

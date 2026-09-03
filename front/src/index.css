@@ -1,0 +1,419 @@
+/* =========================================
+   DEVGEST - ESTILO GLOBAL
+   ========================================= */
+
+:root {
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+
+  color: #263238;
+  background: #f5f7fa;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  --azul: #1976d2;
+  --azul-escuro: #125ca3;
+  --azul-claro: #eaf4ff;
+
+  --amarelo: #fbc02d;
+  --amarelo-claro: #fff8dc;
+
+  --verde: #2e9d5b;
+  --verde-claro: #e9f7ef;
+
+  --vermelho: #d9534f;
+  --vermelho-claro: #fdeeee;
+
+  --texto: #263238;
+  --texto-secundario: #68737d;
+
+  --fundo: #f5f7fa;
+  --branco: #ffffff;
+  --borda: #e4e8ec;
+
+  --sombra: 0 2px 10px rgba(25, 118, 210, 0.08);
+
+  --raio: 14px;
+}
+
+/* =========================================
+   RESET
+   ========================================= */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  min-width: 320px;
+  background: var(--fundo);
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  background: var(--fundo);
+  color: var(--texto);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* =========================================
+   APP
+   ========================================= */
+
+#root {
+  min-height: 100vh;
+}
+
+/* =========================================
+   CONTAINER PRINCIPAL
+   ========================================= */
+
+.app-container {
+  width: 100%;
+  max-width: 600px;
+  min-height: 100vh;
+  margin: 0 auto;
+  background: var(--fundo);
+}
+
+/* =========================================
+   CONTEÚDO
+   ========================================= */
+
+.main-content {
+  width: 100%;
+  padding: 20px 16px 95px;
+}
+
+/* =========================================
+   TÍTULOS
+   ========================================= */
+
+.page-title {
+  font-size: 26px;
+  line-height: 1.2;
+  font-weight: 700;
+  color: var(--texto);
+  margin-bottom: 6px;
+}
+
+.page-subtitle {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--texto-secundario);
+  margin-bottom: 22px;
+}
+
+.section-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--texto);
+  margin-bottom: 12px;
+}
+
+/* =========================================
+   CARDS
+   ========================================= */
+
+.card {
+  background: var(--branco);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+  padding: 16px;
+}
+
+.card + .card {
+  margin-top: 12px;
+}
+
+/* =========================================
+   BOTÕES
+   ========================================= */
+
+.btn {
+  width: 100%;
+  min-height: 48px;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 15px;
+  font-weight: 600;
+
+  transition:
+    background-color 0.2s ease,
+    transform 0.1s ease,
+    box-shadow 0.2s ease;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn-primary {
+  color: #fff;
+  background: var(--azul);
+  box-shadow: 0 3px 8px rgba(25, 118, 210, 0.2);
+}
+
+.btn-primary:hover {
+  background: var(--azul-escuro);
+}
+
+.btn-secondary {
+  color: var(--azul);
+  background: var(--azul-claro);
+}
+
+.btn-warning {
+  color: #5f4b00;
+  background: var(--amarelo-claro);
+}
+
+.btn-danger {
+  color: var(--vermelho);
+  background: var(--vermelho-claro);
+}
+
+/* =========================================
+   INPUTS
+   ========================================= */
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 7px;
+
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--texto);
+}
+
+.form-input,
+.form-select {
+  width: 100%;
+  min-height: 48px;
+
+  padding: 12px 14px;
+
+  color: var(--texto);
+  background: var(--branco);
+
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+
+  outline: none;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.form-input:focus,
+.form-select:focus {
+  border-color: var(--azul);
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+}
+
+/* =========================================
+   STATUS
+   ========================================= */
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 5px 9px;
+
+  border-radius: 999px;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.status-success {
+  color: #217a45;
+  background: var(--verde-claro);
+}
+
+.status-warning {
+  color: #725900;
+  background: var(--amarelo-claro);
+}
+
+.status-danger {
+  color: #a73532;
+  background: var(--vermelho-claro);
+}
+
+/* =========================================
+   VALORES
+   ========================================= */
+
+.money {
+  font-weight: 700;
+  color: var(--texto);
+}
+
+.money-large {
+  font-size: 28px;
+  font-weight: 750;
+  color: var(--azul);
+}
+
+/* =========================================
+   LISTAS
+   ========================================= */
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.list-item {
+  background: var(--branco);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: 15px;
+}
+
+/* =========================================
+   MENSAGENS
+   ========================================= */
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  min-height: 160px;
+
+  color: var(--texto-secundario);
+  font-size: 14px;
+}
+
+.empty-state {
+  padding: 32px 20px;
+
+  text-align: center;
+
+  color: var(--texto-secundario);
+  background: var(--branco);
+
+  border: 1px dashed var(--borda);
+  border-radius: var(--raio);
+}
+
+.error-message {
+  padding: 12px 14px;
+
+  color: #a73532;
+  background: var(--vermelho-claro);
+
+  border: 1px solid #f3cccc;
+  border-radius: 10px;
+
+  font-size: 14px;
+}
+
+/* =========================================
+   ESPAÇAMENTOS
+   ========================================= */
+
+.mt-8 {
+  margin-top: 8px;
+}
+
+.mt-12 {
+  margin-top: 12px;
+}
+
+.mt-16 {
+  margin-top: 16px;
+}
+
+.mt-20 {
+  margin-top: 20px;
+}
+
+.mt-24 {
+  margin-top: 24px;
+}
+
+.mb-8 {
+  margin-bottom: 8px;
+}
+
+.mb-12 {
+  margin-bottom: 12px;
+}
+
+.mb-16 {
+  margin-bottom: 16px;
+}
+
+.mb-20 {
+  margin-bottom: 20px;
+}
+
+.mb-24 {
+  margin-bottom: 24px;
+}
+
+/* =========================================
+   MOBILE
+   ========================================= */
+
+@media (max-width: 600px) {
+  .main-content {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+/* =========================================
+   DESKTOP
+   ========================================= */
+
+@media (min-width: 601px) {
+  body {
+    padding: 20px 0;
+  }
+
+  .app-container {
+    min-height: calc(100vh - 40px);
+    border-radius: 18px;
+    overflow: hidden;
+  }
+}

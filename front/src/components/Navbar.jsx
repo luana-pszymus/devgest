@@ -1,66 +1,62 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Home, Users, Zap, History } from 'lucide-react';
+import { Link, useLocation } from "react-router-dom";
+import "./Navbar.css";
 
-export default function Navbar() {
+import homeIcon from "../assets/icons/home.png";
+import luzIcon from "../assets/icons/luz.png";
+import inquilinoIcon from "../assets/icons/inquilino.png";
+import historicoIcon from "../assets/icons/historico.png";
+
+function Navbar() {
   const location = useLocation();
 
-  // Função para saber se a aba está selecionada
-  const isActive = (path) => location.pathname === path;
+  const items = [
+    {
+      path: "/",
+      label: "Início",
+      icon: homeIcon,
+    },
+    {
+      path: "/registro",
+      label: "Energia",
+      icon: luzIcon,
+    },
+    {
+      path: "/inquilinos",
+      label: "Inquilinos",
+      icon: inquilinoIcon,
+    },
+    {
+      path: "/consulta",
+      label: "Histórico",
+      icon: historicoIcon,
+    },
+  ];
 
   return (
-    <nav style={styles.bottomNav}>
-      <Link to="/" style={styles.navItem(isActive('/'))}>
-        <Home size={22} />
-        <span style={styles.label}>Início</span>
-      </Link>
+    <nav className="bottom-nav" aria-label="Navegação principal">
+      {items.map((item) => {
+        const active = location.pathname === item.path;
 
-      <Link to="/registro" style={styles.navItem(isActive('/registro'))}>
-        <Zap size={22} />
-        <span style={styles.label}>Luz</span>
-      </Link>
+        return (
+          <Link
+            key={item.path}
+            to={item.path}
+            className={`nav-item ${active ? "active" : ""}`}
+          >
+            <span className="nav-icon-wrapper">
+              <img
+                src={item.icon}
+                alt=""
+                className="nav-icon"
+              />
+            </span>
 
-      <Link to="/inquilinos" style={styles.navItem(isActive('/inquilinos'))}>
-        <Users size={22} />
-        <span style={styles.label}>Inquilinos</span>
-      </Link>
-
-      <Link to="/consulta" style={styles.navItem(isActive('/consulta'))}>
-        <History size={22} />
-        <span style={styles.label}>Histórico</span>
-      </Link>
+            <span className="nav-label">{item.label}</span>
+          </Link>
+        );
+      })}
     </nav>
   );
 }
 
-const styles = {
-  bottomNav: {
-    position: 'fixed',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: '65px',
-    backgroundColor: '#ffffff',
-    borderTop: '1px solid #e2e8f0',
-    display: 'flex',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    zIndex: 1000,
-    boxShadow: '0 -2px 10px rgba(0,0,0,0.05)'
-  },
-  navItem: (active) => ({
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    textDecoration: 'none',
-    color: active ? '#1e3a8a' : '#64748b',
-    fontWeight: active ? 'bold' : 'normal',
-    width: '25%',
-    height: '100%'
-  }),
-  label: {
-    fontSize: '11px',
-    marginTop: '3px'
-  }
-};
+export default Navbar;
