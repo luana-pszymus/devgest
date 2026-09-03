@@ -20,7 +20,7 @@ function RegistrarConsumo() {
 
   async function carregarContratos() {
     try {
-      const { data } = await api.get("/api/contrato/listar");
+      const { data } = await api.get("/api/contratos");
 
       setContratos(data);
     } catch (error) {

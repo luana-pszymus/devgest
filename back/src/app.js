@@ -14,7 +14,7 @@ app.get("/api", (req, res) => {
 });
 
 const consController = require("./controllers/consController");
-app.get("/api/contratos", consController.listarContrato);
+
 app.get("/api/inquilinos", consController.listarInquilino);
 app.get("/api/kitnet", consController.listarKitnet);
 app.get("/api/conteudo", consController.listarConten);
