@@ -1,265 +1,376 @@
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
-import {
-  Building2,
-  CheckCircle2,
-  AlertCircle,
-  Zap,
-  DollarSign,
-} from "lucide-react";
+import "./dashboard.css";
+
+const MESES = [
+  "Janeiro",
+  "Fevereiro",
+  "Março",
+  "Abril",
+  "Maio",
+  "Junho",
+  "Julho",
+  "Agosto",
+  "Setembro",
+  "Outubro",
+  "Novembro",
+  "Dezembro",
+];
+
+function formatarMoeda(valor) {
+  return Number(valor || 0).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
+}
 
 export default function Dashboard() {
-  const TARIFA_KWH = 1.0; // Valor por kWh
+  const [kitnets, setKitnets] = useState([]);
+  const [contratos, setContratos] = useState([]);
+  const [inquilinos, setInquilinos] = useState([]);
+  const [consumos, setConsumos] = useState([]);
 
-  // Carrega ou inicializa os dados salvos no celular
-  const [kitnets, setKitnets] = useState(() => {
-    const salvos = localStorage.getItem("gestao_kitnets");
-    return salvos
-      ? JSON.parse(salvos)
-      : [
-          {
-            id: 1,
-            nome: "Kitnet 01",
-            inquilino: "Jessica",
-            aluguel: 540,
-            status: "pago",
-            consumoLuz: 60,
-          },
-          {
-            id: 2,
-            nome: "Kitnet 02",
-            inquilino: "Carlos Souza",
-            aluguel: 560,
-            status: "pendente",
-            consumoLuz: 45,
-          },
-          {
-            id: 3,
-            nome: "Kitnet 03",
-            inquilino: "Vazio / Disponível",
-            aluguel: 550,
-            status: "pago",
-            consumoLuz: 0,
-          },
-        ];
-  });
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState("");
 
   useEffect(() => {
-    localStorage.setItem("gestao_kitnets", JSON.stringify(kitnets));
-  }, [kitnets]);
+    carregarDados();
+  }, []);
 
-  // Alterna entre Pago e Pendente com 1 toque
-  const alternarStatus = (id) => {
-    setKitnets(
-      kitnets.map((k) => {
-        if (k.id === id) {
-          return { ...k, status: k.status === "pago" ? "pendente" : "pago" };
-        }
-        return k;
-      }),
+  async function carregarDados() {
+    try {
+      setCarregando(true);
+      setErro("");
+
+      const [kitnetsResponse, contratosResponse, inquilinosResponse, consumosResponse] =
+        await Promise.all([
+          fetch("http://localhost:3000/api/kitnet"),
+          fetch("http://localhost:3000/api/contratos"),
+          fetch("http://localhost:3000/api/inquilinos"),
+          fetch("http://localhost:3000/api/consumo/listar"),
+        ]);
+
+      if (
+        !kitnetsResponse.ok ||
+        !contratosResponse.ok ||
+        !inquilinosResponse.ok ||
+        !consumosResponse.ok
+      ) {
+        throw new Error("Não foi possível carregar os dados.");
+      }
+
+      const [kitnetsData, contratosData, inquilinosData, consumosData] =
+        await Promise.all([
+          kitnetsResponse.json(),
+          contratosResponse.json(),
+          inquilinosResponse.json(),
+          consumosResponse.json(),
+        ]);
+
+      setKitnets(Array.isArray(kitnetsData) ? kitnetsData : []);
+      setContratos(Array.isArray(contratosData) ? contratosData : []);
+      setInquilinos(Array.isArray(inquilinosData) ? inquilinosData : []);
+      setConsumos(Array.isArray(consumosData) ? consumosData : []);
+    } catch (error) {
+      console.error("Erro ao carregar Dashboard:", error);
+      setErro("Não foi possível carregar os dados.");
+    } finally {
+      setCarregando(false);
+    }
+  }
+
+  function encontrarContrato(kitnetId) {
+    return contratos.find(
+      (contrato) =>
+        Number(contrato.kitnet_id) === Number(kitnetId) &&
+        !contrato.data_fim,
     );
-  };
+  }
 
-  // Cálculos rápidos do painel
-  const totalAluguel = kitnets.reduce((acc, k) => acc + k.aluguel, 0);
-  const totalRecebido = kitnets
-    .filter((k) => k.status === "pago")
-    .reduce((acc, k) => acc + k.aluguel, 0);
-  const pendentesCount = kitnets.filter((k) => k.status === "pendente").length;
+  function encontrarInquilino(contrato) {
+    if (!contrato) return null;
+
+    return inquilinos.find(
+      (inquilino) => Number(inquilino.id) === Number(contrato.inquilino_id),
+    );
+  }
+
+  function encontrarUltimoConsumo(contratoId) {
+    const registros = consumos
+      .filter(
+        (consumo) =>
+          Number(consumo.contrato_id) === Number(contratoId),
+      )
+      .sort((a, b) => {
+        const anoA = Number(a.ano);
+        const anoB = Number(b.ano);
+        const mesA = Number(a.mes);
+        const mesB = Number(b.mes);
+
+        if (anoA !== anoB) {
+          return anoB - anoA;
+        }
+
+        return mesB - mesA;
+      });
+
+    return registros[0] || null;
+  }
+
+  const totalKitnets = kitnets.length;
+
+  const kitnetsOcupadas = kitnets.filter((kitnet) =>
+    encontrarContrato(kitnet.id),
+  ).length;
+
+  const kitnetsDisponiveis = totalKitnets - kitnetsOcupadas;
+
+  const valorAlugueis = kitnets
+    .filter((kitnet) => encontrarContrato(kitnet.id))
+    .reduce(
+      (total, kitnet) => total + Number(kitnet.valor_aluguel || 0),
+      0,
+    );
+
+  const mesAtual = new Date().getMonth() + 1;
+  const anoAtual = new Date().getFullYear();
+
+  const consumosMesAtual = consumos.filter(
+    (consumo) =>
+      Number(consumo.mes) === mesAtual &&
+      Number(consumo.ano) === anoAtual,
+  );
+
+  const valorEnergiaMes = consumosMesAtual.reduce(
+    (total, consumo) => total + Number(consumo.valor_energia || 0),
+    0,
+  );
 
   return (
-    <div style={styles.container}>
-      {/* Topo / Header Mobile */}
-      <header style={styles.header}>
-        <h1 style={styles.appTitle}>Gestão Kitnets</h1>
-        <p style={styles.appSubtitle}>Visão Geral do Mês</p>
+    <div className="dashboard">
+      <main className="dashboard-content">
+        {/* CABEÇALHO */}
+        <header className="dashboard-header">
+          <div>
+            <span className="dashboard-eyebrow">GESTÃO DE KITNETS</span>
 
-        {/* Card de Resumo Financeiro */}
-        <div style={styles.resumoCard}>
-          <div style={styles.resumoItem}>
-            <span style={styles.resumoLabel}>Recebido</span>
-            <strong style={{ color: "#16a34a", fontSize: "18px" }}>
-              R$ {totalRecebido.toFixed(2)}
-            </strong>
+            <h1>Visão geral</h1>
+
+            <p>
+              {MESES[mesAtual - 1]} de {anoAtual}
+            </p>
           </div>
-          <div style={styles.resumoDivider}></div>
-          <div style={styles.resumoItem}>
-            <span style={styles.resumoLabel}>Pendentes</span>
-            <strong
-              style={{
-                color: pendentesCount > 0 ? "#dc2626" : "#475569",
-                fontSize: "18px",
-              }}
-            >
-              {pendentesCount} {pendentesCount === 1 ? "imóvel" : "imóveis"}
-            </strong>
+
+          <button
+            className="refresh-button"
+            onClick={carregarDados}
+            title="Atualizar dados"
+            aria-label="Atualizar dados"
+          >
+            ↻
+          </button>
+        </header>
+
+        {/* ERRO */}
+        {erro && (
+          <div className="dashboard-error">
+            <strong>Não foi possível carregar os dados.</strong>
+
+            <button onClick={carregarDados}>Tentar novamente</button>
           </div>
-        </div>
-      </header>
+        )}
 
-      {/* Lista Principal de Imóveis */}
-      <main style={styles.content}>
-        <h2 style={styles.sectionTitle}>Suas Kitnets</h2>
+        {/* CARREGANDO */}
+        {carregando ? (
+          <div className="dashboard-loading">
+            <div className="loading-circle"></div>
+            <p>Carregando seus dados...</p>
+          </div>
+        ) : (
+          <>
+            {/* RESUMO */}
+            <section className="summary-section">
+              <div className="summary-card summary-main">
+                <span className="summary-label">Aluguéis cadastrados</span>
 
-        <div style={styles.list}>
-          {kitnets.map((item) => (
-            <div key={item.id} style={styles.card}>
-              <div style={styles.cardTop}>
-                <div>
-                  <h3 style={styles.kitnetNome}>{item.nome}</h3>
-                  <p style={styles.inquilinoNome}>👤 {item.inquilino}</p>
+                <strong className="summary-value">
+                  {formatarMoeda(valorAlugueis)}
+                </strong>
+
+                <span className="summary-description">
+                  {kitnetsOcupadas}{" "}
+                  {kitnetsOcupadas === 1 ? "kitnet ocupada" : "kitnets ocupadas"}
+                </span>
+              </div>
+
+              <div className="summary-grid">
+                <div className="summary-card">
+                  <div className="summary-icon blue">⌂</div>
+
+                  <strong>{totalKitnets}</strong>
+
+                  <span>Total de kitnets</span>
                 </div>
-                <span style={styles.precoText}>
-                  R$ {item.aluguel.toFixed(2)}
+
+                <div className="summary-card">
+                  <div className="summary-icon yellow">✓</div>
+
+                  <strong>{kitnetsOcupadas}</strong>
+
+                  <span>Ocupadas</span>
+                </div>
+
+                <div className="summary-card">
+                  <div className="summary-icon green">+</div>
+
+                  <strong>{kitnetsDisponiveis}</strong>
+
+                  <span>Disponíveis</span>
+                </div>
+
+                <div className="summary-card">
+                  <div className="summary-icon blue">⚡</div>
+
+                  <strong>{formatarMoeda(valorEnergiaMes)}</strong>
+
+                  <span>Energia no mês</span>
+                </div>
+              </div>
+            </section>
+
+            {/* KITNETS */}
+            <section className="kitnets-section">
+              <div className="section-heading">
+                <div>
+                  <span className="section-eyebrow">SEUS IMÓVEIS</span>
+                  <h2>Kitnets</h2>
+                </div>
+
+                <span className="kitnet-count">
+                  {totalKitnets}
                 </span>
               </div>
 
-              {/* Informação rápida de luz */}
-              <div style={styles.luzBadge}>
-                <Zap size={15} color="#0284c7" />
-                <span>
-                  Luz atual:{" "}
-                  <strong>
-                    R$ {(item.consumoLuz * TARIFA_KWH).toFixed(2)}
-                  </strong>{" "}
-                  ({item.consumoLuz} kWh)
-                </span>
-              </div>
+              {kitnets.length === 0 ? (
+                <div className="empty-dashboard">
+                  <div className="empty-icon">⌂</div>
 
-              {/* Botão de Ação Direta (Grande para o Polegar) */}
-              <button
-                onClick={() => alternarStatus(item.id)}
-                style={
-                  item.status === "pago" ? styles.btnPago : styles.btnPendente
-                }
-              >
-                {item.status === "pago" ? (
-                  <>
-                    {" "}
-                    <CheckCircle2 size={20} /> ALUGUEL PAGO{" "}
-                  </>
-                ) : (
-                  <>
-                    {" "}
-                    <AlertCircle size={20} /> MARCAR COMO PAGO{" "}
-                  </>
-                )}
-              </button>
-            </div>
-          ))}
-        </div>
+                  <h3>Nenhuma kitnet cadastrada</h3>
+
+                  <p>
+                    Quando houver imóveis cadastrados, eles aparecerão aqui.
+                  </p>
+                </div>
+              ) : (
+                <div className="kitnet-list">
+                  {kitnets.map((kitnet) => {
+                    const contrato = encontrarContrato(kitnet.id);
+                    const inquilino = encontrarInquilino(contrato);
+                    const ultimoConsumo = encontrarUltimoConsumo(
+                      contrato?.id,
+                    );
+
+                    const ocupada = Boolean(contrato);
+
+                    return (
+                      <article
+                        className="kitnet-card"
+                        key={kitnet.id}
+                      >
+                        <div className="kitnet-card-header">
+                          <div>
+                            <span className="kitnet-number">
+                              KITNET
+                            </span>
+
+                            <h3>
+                              {kitnet.numero ||
+                                `Kitnet ${String(kitnet.id).padStart(2, "0")}`}
+                            </h3>
+                          </div>
+
+                          <span
+                            className={
+                              ocupada
+                                ? "occupancy occupied"
+                                : "occupancy available"
+                            }
+                          >
+                            <span className="occupancy-dot"></span>
+
+                            {ocupada ? "Ocupada" : "Disponível"}
+                          </span>
+                        </div>
+
+                        <div className="kitnet-divider"></div>
+
+                        <div className="kitnet-info">
+                          <div className="info-row">
+                            <span>Inquilino</span>
+
+                            <strong>
+                              {inquilino?.nome || "Nenhum inquilino"}
+                            </strong>
+                          </div>
+
+                          <div className="info-row">
+                            <span>Aluguel</span>
+
+                            <strong>
+                              {formatarMoeda(kitnet.valor_aluguel)}
+                            </strong>
+                          </div>
+
+                          {ultimoConsumo && (
+                            <div className="energy-info">
+                              <div className="energy-title">
+                                <span>⚡</span>
+                                <strong>Último consumo</strong>
+                              </div>
+
+                              <div className="energy-values">
+                                <div>
+                                  <span>Consumo</span>
+
+                                  <strong>
+                                    {Number(
+                                      ultimoConsumo.consumo_kwh || 0,
+                                    ).toFixed(0)}{" "}
+                                    kWh
+                                  </strong>
+                                </div>
+
+                                <div>
+                                  <span>Energia</span>
+
+                                  <strong>
+                                    {formatarMoeda(
+                                      ultimoConsumo.valor_energia,
+                                    )}
+                                  </strong>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {!ocupada && (
+                            <div className="available-message">
+                              Esta kitnet está disponível para um novo
+                              inquilino.
+                            </div>
+                          )}
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              )}
+            </section>
+          </>
+        )}
       </main>
 
-      {/* Menu Fixo no Rodapé */}
       <Navbar />
     </div>
   );
 }
-
-const styles = {
-  container: {
-    backgroundColor: "#f8fafc",
-    minHeight: "100vh",
-    paddingBottom: "90px", // Espaço para não cobrir o conteúdo com a Navbar
-    fontFamily:
-      '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-  },
-  header: {
-    backgroundColor: "#1e3a8a",
-    padding: "20px 16px 40px 16px",
-    color: "#ffffff",
-    borderBottomLeftRadius: "20px",
-    borderBottomRightRadius: "20px",
-  },
-  appTitle: { margin: 0, fontSize: "22px", fontWeight: "bold" },
-  appSubtitle: { margin: "4px 0 0 0", fontSize: "13px", color: "#93c5fd" },
-  resumoCard: {
-    backgroundColor: "#ffffff",
-    borderRadius: "14px",
-    padding: "16px",
-    marginTop: "16px",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-  },
-  resumoItem: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "4px",
-    flex: 1,
-    textAlign: "center",
-  },
-  resumoLabel: { fontSize: "12px", color: "#64748b", fontWeight: "600" },
-  resumoDivider: { width: "1px", height: "35px", backgroundColor: "#e2e8f0" },
-  content: { padding: "0 16px", marginTop: "-15px" },
-  sectionTitle: {
-    fontSize: "16px",
-    color: "#1e293b",
-    marginBottom: "12px",
-    fontWeight: "bold",
-  },
-  list: { display: "flex", flexDirection: "column", gap: "12px" },
-  card: {
-    backgroundColor: "#ffffff",
-    borderRadius: "14px",
-    padding: "16px",
-    boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
-    border: "1px solid #e2e8f0",
-  },
-  cardTop: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: "10px",
-  },
-  kitnetNome: {
-    margin: 0,
-    fontSize: "17px",
-    color: "#0f172a",
-    fontWeight: "bold",
-  },
-  inquilinoNome: { margin: "4px 0 0 0", fontSize: "14px", color: "#475569" },
-  precoText: { fontSize: "17px", fontWeight: "bold", color: "#1e3a8a" },
-  luzBadge: {
-    display: "flex",
-    alignItems: "center",
-    gap: "6px",
-    backgroundColor: "#f0f9ff",
-    padding: "8px 12px",
-    borderRadius: "8px",
-    fontSize: "13px",
-    color: "#0369a1",
-    marginBottom: "12px",
-  },
-  btnPago: {
-    width: "100%",
-    height: "48px", // Tamanho ideal para o polegar
-    backgroundColor: "#dcfce7",
-    color: "#15803d",
-    border: "none",
-    borderRadius: "10px",
-    fontSize: "14px",
-    fontWeight: "bold",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: "8px",
-    cursor: "pointer",
-  },
-  btnPendente: {
-    width: "100%",
-    height: "48px",
-    backgroundColor: "#fee2e2",
-    color: "#b91c1c",
-    border: "none",
-    borderRadius: "10px",
-    fontSize: "14px",
-    fontWeight: "bold",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: "8px",
-    cursor: "pointer",
-  },
-};

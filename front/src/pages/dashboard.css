@@ -1,0 +1,623 @@
+/* =========================================
+   DASHBOARD
+   ========================================= */
+
+.dashboard {
+  min-height: 100vh;
+  background: #f5f7fa;
+  color: #263238;
+}
+
+.dashboard-content {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 22px 16px 105px;
+}
+
+/* =========================================
+   CABEÇALHO
+   ========================================= */
+
+.dashboard-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  margin-bottom: 20px;
+}
+
+.dashboard-eyebrow {
+  display: block;
+
+  margin-bottom: 6px;
+
+  color: #1976d2;
+
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.dashboard-header h1 {
+  margin: 0;
+
+  color: #263238;
+
+  font-size: 28px;
+  line-height: 1.15;
+  font-weight: 750;
+}
+
+.dashboard-header p {
+  margin: 6px 0 0;
+
+  color: #68737d;
+
+  font-size: 14px;
+}
+
+.refresh-button {
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid #e4e8ec;
+  border-radius: 12px;
+
+  background: #ffffff;
+
+  color: #1976d2;
+
+  font-size: 24px;
+  line-height: 1;
+
+  box-shadow: 0 2px 10px rgba(25, 118, 210, 0.08);
+
+  transition:
+    background-color 0.2s ease,
+    transform 0.1s ease;
+}
+
+.refresh-button:hover {
+  background: #eaf4ff;
+}
+
+.refresh-button:active {
+  transform: scale(0.95);
+}
+
+/* =========================================
+   RESUMO
+   ========================================= */
+
+.summary-section {
+  margin-bottom: 28px;
+}
+
+.summary-card {
+  background: #ffffff;
+
+  border: 1px solid #e4e8ec;
+  border-radius: 14px;
+
+  box-shadow: 0 2px 10px rgba(25, 118, 210, 0.08);
+}
+
+.summary-main {
+  padding: 20px;
+
+  background: #1976d2;
+
+  border-color: #1976d2;
+
+  color: #ffffff;
+}
+
+.summary-label {
+  display: block;
+
+  margin-bottom: 7px;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  opacity: 0.9;
+}
+
+.summary-value {
+  display: block;
+
+  font-size: 28px;
+  line-height: 1.2;
+}
+
+.summary-description {
+  display: block;
+
+  margin-top: 7px;
+
+  font-size: 13px;
+
+  opacity: 0.85;
+}
+
+.summary-grid {
+  display: grid;
+
+  grid-template-columns: repeat(2, 1fr);
+
+  gap: 10px;
+
+  margin-top: 10px;
+}
+
+.summary-grid .summary-card {
+  min-height: 122px;
+
+  padding: 15px;
+}
+
+.summary-icon {
+  width: 32px;
+  height: 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 10px;
+
+  border-radius: 9px;
+
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.summary-icon.blue {
+  color: #1976d2;
+  background: #eaf4ff;
+}
+
+.summary-icon.yellow {
+  color: #735b00;
+  background: #fff8dc;
+}
+
+.summary-icon.green {
+  color: #247a48;
+  background: #e9f7ef;
+}
+
+.summary-grid strong {
+  display: block;
+
+  color: #263238;
+
+  font-size: 20px;
+  line-height: 1.2;
+}
+
+.summary-grid span:last-child {
+  display: block;
+
+  margin-top: 5px;
+
+  color: #68737d;
+
+  font-size: 12px;
+}
+
+/* =========================================
+   SEÇÃO DE KITNETS
+   ========================================= */
+
+.kitnets-section {
+  width: 100%;
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 13px;
+}
+
+.section-eyebrow {
+  display: block;
+
+  margin-bottom: 2px;
+
+  color: #68737d;
+
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.9px;
+}
+
+.section-heading h2 {
+  margin: 0;
+
+  color: #263238;
+
+  font-size: 21px;
+  font-weight: 750;
+}
+
+.kitnet-count {
+  min-width: 30px;
+  height: 30px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 9px;
+
+  border-radius: 999px;
+
+  color: #1976d2;
+  background: #eaf4ff;
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.kitnet-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* =========================================
+   CARD DA KITNET
+   ========================================= */
+
+.kitnet-card {
+  padding: 17px;
+
+  background: #ffffff;
+
+  border: 1px solid #e4e8ec;
+  border-radius: 14px;
+
+  box-shadow: 0 2px 10px rgba(25, 118, 210, 0.07);
+}
+
+.kitnet-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 12px;
+}
+
+.kitnet-number {
+  display: block;
+
+  margin-bottom: 3px;
+
+  color: #68737d;
+
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.kitnet-card h3 {
+  margin: 0;
+
+  color: #263238;
+
+  font-size: 19px;
+  font-weight: 750;
+}
+
+.occupancy {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  flex-shrink: 0;
+
+  padding: 6px 9px;
+
+  border-radius: 999px;
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.occupancy-dot {
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+}
+
+.occupancy.occupied {
+  color: #247a48;
+  background: #e9f7ef;
+}
+
+.occupancy.occupied .occupancy-dot {
+  background: #2e9d5b;
+}
+
+.occupancy.available {
+  color: #735b00;
+  background: #fff8dc;
+}
+
+.occupancy.available .occupancy-dot {
+  background: #fbc02d;
+}
+
+.kitnet-divider {
+  height: 1px;
+
+  margin: 14px 0;
+
+  background: #edf0f2;
+}
+
+/* =========================================
+   INFORMAÇÕES
+   ========================================= */
+
+.kitnet-info {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 15px;
+}
+
+.info-row span {
+  color: #68737d;
+
+  font-size: 13px;
+}
+
+.info-row strong {
+  color: #263238;
+
+  font-size: 14px;
+  text-align: right;
+}
+
+.info-row:nth-child(2) strong {
+  color: #1976d2;
+
+  font-size: 16px;
+}
+
+/* =========================================
+   ENERGIA
+   ========================================= */
+
+.energy-info {
+  margin-top: 2px;
+
+  padding: 12px;
+
+  border-radius: 11px;
+
+  background: #eaf4ff;
+}
+
+.energy-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  margin-bottom: 10px;
+
+  color: #1976d2;
+
+  font-size: 12px;
+}
+
+.energy-title span {
+  font-size: 15px;
+}
+
+.energy-values {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+
+  gap: 10px;
+}
+
+.energy-values div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.energy-values span {
+  color: #68737d;
+
+  font-size: 11px;
+}
+
+.energy-values strong {
+  color: #263238;
+
+  font-size: 14px;
+}
+
+/* =========================================
+   KITNET DISPONÍVEL
+   ========================================= */
+
+.available-message {
+  padding: 11px 12px;
+
+  border-radius: 10px;
+
+  color: #735b00;
+  background: #fff8dc;
+
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+/* =========================================
+   ESTADOS
+   ========================================= */
+
+.dashboard-loading {
+  min-height: 300px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  color: #68737d;
+}
+
+.loading-circle {
+  width: 30px;
+  height: 30px;
+
+  margin-bottom: 12px;
+
+  border: 3px solid #eaf4ff;
+  border-top-color: #1976d2;
+  border-radius: 50%;
+
+  animation: dashboard-spin 0.8s linear infinite;
+}
+
+.dashboard-loading p {
+  margin: 0;
+
+  font-size: 14px;
+}
+
+@keyframes dashboard-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.dashboard-error {
+  margin-bottom: 20px;
+
+  padding: 14px;
+
+  border: 1px solid #f3cccc;
+  border-radius: 12px;
+
+  background: #fdeeee;
+
+  color: #a73532;
+
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.dashboard-error strong {
+  display: block;
+
+  margin-bottom: 9px;
+}
+
+.dashboard-error button {
+  padding: 8px 12px;
+
+  border: none;
+  border-radius: 8px;
+
+  color: #ffffff;
+  background: #d9534f;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.empty-dashboard {
+  padding: 35px 20px;
+
+  text-align: center;
+
+  background: #ffffff;
+
+  border: 1px dashed #dce2e7;
+  border-radius: 14px;
+}
+
+.empty-icon {
+  width: 48px;
+  height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin: 0 auto 12px;
+
+  border-radius: 14px;
+
+  color: #1976d2;
+  background: #eaf4ff;
+
+  font-size: 24px;
+}
+
+.empty-dashboard h3 {
+  margin: 0;
+
+  color: #263238;
+
+  font-size: 16px;
+}
+
+.empty-dashboard p {
+  margin: 6px 0 0;
+
+  color: #68737d;
+
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* =========================================
+   CELULARES PEQUENOS
+   ========================================= */
+
+@media (max-width: 380px) {
+  .dashboard-content {
+    padding-left: 13px;
+    padding-right: 13px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 25px;
+  }
+
+  .summary-value {
+    font-size: 25px;
+  }
+
+  .kitnet-card {
+    padding: 15px;
+  }
+
+  .occupancy {
+    padding: 5px 7px;
+    font-size: 10px;
+  }
+}

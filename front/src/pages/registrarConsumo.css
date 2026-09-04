@@ -1,0 +1,801 @@
+/* =========================================
+   PÁGINA
+   ========================================= */
+
+.consumo-page {
+  min-height: 100vh;
+
+  background: #f5f7fa;
+
+  color: #263238;
+}
+
+.consumo-content {
+  width: 100%;
+  max-width: 600px;
+
+  margin: 0 auto;
+
+  padding: 22px 16px 110px;
+}
+
+/* =========================================
+   CABEÇALHO
+   ========================================= */
+
+.consumo-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  margin-bottom: 22px;
+}
+
+.consumo-eyebrow {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: #1976d2;
+
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.consumo-header h1 {
+  margin: 0;
+
+  color: #263238;
+
+  font-size: 27px;
+  line-height: 1.15;
+  font-weight: 750;
+}
+
+.consumo-header p {
+  margin: 6px 0 0;
+
+  color: #68737d;
+
+  font-size: 14px;
+}
+
+.energy-header-icon {
+  width: 45px;
+  height: 45px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border-radius: 13px;
+
+  background: #fff3bf;
+
+  font-size: 22px;
+}
+
+/* =========================================
+   FORMULÁRIO
+   ========================================= */
+
+.consumo-form {
+  display: flex;
+  flex-direction: column;
+
+  gap: 12px;
+}
+
+.form-section {
+  padding: 17px;
+
+  background: #ffffff;
+
+  border: 1px solid #e4e8ec;
+  border-radius: 14px;
+
+  box-shadow: 0 2px 10px rgba(25, 118, 210, 0.06);
+}
+
+/* =========================================
+   TÍTULO DAS SEÇÕES
+   ========================================= */
+
+.section-title {
+  display: flex;
+  align-items: flex-start;
+
+  gap: 11px;
+
+  margin-bottom: 16px;
+}
+
+.section-number {
+  width: 27px;
+  height: 27px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border-radius: 8px;
+
+  color: #1976d2;
+  background: #eaf4ff;
+
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.section-title strong {
+  display: block;
+
+  color: #263238;
+
+  font-size: 15px;
+}
+
+.section-title span:last-child {
+  display: block;
+
+  margin-top: 3px;
+
+  color: #68737d;
+
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+/* =========================================
+   CAMPOS
+   ========================================= */
+
+.field-label {
+  display: block;
+
+  margin-bottom: 6px;
+
+  color: #4d5a63;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.field-control {
+  width: 100%;
+  height: 47px;
+
+  box-sizing: border-box;
+
+  padding: 0 13px;
+
+  border: 1px solid #dce2e7;
+  border-radius: 10px;
+
+  outline: none;
+
+  background: #ffffff;
+
+  color: #263238;
+
+  font-family: inherit;
+  font-size: 14px;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.field-control:focus {
+  border-color: #1976d2;
+
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+}
+
+.field-control::placeholder {
+  color: #9aa4ac;
+}
+
+/* =========================================
+   INQUILINO
+   ========================================= */
+
+.tenant-card {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  margin-top: 10px;
+
+  padding: 11px 12px;
+
+  border-radius: 10px;
+
+  background: #f5f7fa;
+}
+
+.tenant-icon {
+  width: 34px;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 9px;
+
+  background: #eaf4ff;
+
+  font-size: 16px;
+}
+
+.tenant-card span {
+  display: block;
+
+  color: #68737d;
+
+  font-size: 10px;
+}
+
+.tenant-card strong {
+  display: block;
+
+  margin-top: 2px;
+
+  color: #263238;
+
+  font-size: 13px;
+}
+
+/* =========================================
+   PERÍODO
+   ========================================= */
+
+.period-grid {
+  display: grid;
+
+  grid-template-columns: 1.5fr 1fr;
+
+  gap: 10px;
+}
+
+/* =========================================
+   LEITURA
+   ========================================= */
+
+.reading-card {
+  padding: 14px;
+
+  border-radius: 12px;
+
+  background: #f5f7fa;
+}
+
+.reading-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.reading-row span {
+  color: #68737d;
+
+  font-size: 12px;
+}
+
+.reading-row strong {
+  color: #68737d;
+
+  font-size: 14px;
+}
+
+.reading-divider {
+  height: 1px;
+
+  margin: 13px 0;
+
+  background: #e1e6ea;
+}
+
+.reading-label {
+  display: block;
+
+  margin-bottom: 7px;
+
+  color: #263238;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.reading-input-wrapper {
+  display: flex;
+  align-items: center;
+
+  height: 54px;
+
+  padding: 0 14px;
+
+  border: 2px solid #1976d2;
+  border-radius: 11px;
+
+  background: #ffffff;
+
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.07);
+}
+
+.reading-input {
+  width: 100%;
+
+  border: none;
+  outline: none;
+
+  background: transparent;
+
+  color: #263238;
+
+  font-family: inherit;
+  font-size: 21px;
+  font-weight: 700;
+}
+
+.reading-input::placeholder {
+  color: #b6bec5;
+}
+
+.reading-input-wrapper span {
+  color: #68737d;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* =========================================
+   PREÇO
+   ========================================= */
+
+.price-card {
+  display: flex;
+  flex-direction: column;
+
+  gap: 16px;
+}
+
+.price-field {
+  width: 100%;
+}
+
+.money-input {
+  display: flex;
+  align-items: center;
+
+  height: 47px;
+
+  padding: 0 13px;
+
+  border: 1px solid #dce2e7;
+  border-radius: 10px;
+
+  background: #ffffff;
+}
+
+.money-input span {
+  color: #68737d;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.money-input input {
+  width: 100%;
+
+  margin: 0 6px;
+
+  border: none;
+  outline: none;
+
+  background: transparent;
+
+  color: #263238;
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* =========================================
+   CÁLCULO
+   ========================================= */
+
+.calculation {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 10px;
+}
+
+.calculation > div {
+  padding: 12px;
+
+  border-radius: 10px;
+
+  background: #eaf4ff;
+}
+
+.calculation span {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #68737d;
+
+  font-size: 10px;
+}
+
+.calculation strong {
+  display: block;
+
+  color: #263238;
+
+  font-size: 14px;
+}
+
+.calculation .calculation-total {
+  color: #1976d2;
+
+  font-size: 16px;
+}
+
+/* =========================================
+   BOTÃO
+   ========================================= */
+
+.submit-button {
+  width: 100%;
+  height: 52px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+
+  margin-top: 2px;
+
+  border: none;
+  border-radius: 11px;
+
+  background: #1976d2;
+
+  color: #ffffff;
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 750;
+
+  box-shadow: 0 5px 14px rgba(25, 118, 210, 0.2);
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    transform 0.1s ease;
+}
+
+.submit-button:hover {
+  background: #1565c0;
+}
+
+.submit-button:active {
+  transform: scale(0.98);
+}
+
+.submit-button:disabled {
+  opacity: 0.7;
+
+  cursor: wait;
+}
+
+.button-spinner {
+  width: 16px;
+  height: 16px;
+
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #ffffff;
+
+  border-radius: 50%;
+
+  animation: consumo-spin 0.7s linear infinite;
+}
+
+/* =========================================
+   MENSAGENS
+   ========================================= */
+
+.form-message {
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+
+  margin-bottom: 12px;
+
+  padding: 12px 14px;
+
+  border-radius: 10px;
+
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.form-message.error {
+  border: 1px solid #f2cccc;
+
+  background: #fdf0f0;
+
+  color: #a73532;
+}
+
+.form-message.success {
+  border: 1px solid #c9ead7;
+
+  background: #eefaf3;
+
+  color: #247a48;
+}
+
+/* =========================================
+   HISTÓRICO
+   ========================================= */
+
+.history-section {
+  margin-top: 30px;
+}
+
+.history-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 13px;
+}
+
+.history-heading h2 {
+  margin: 0;
+
+  color: #263238;
+
+  font-size: 21px;
+}
+
+.history-count {
+  min-width: 30px;
+  height: 30px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 9px;
+
+  box-sizing: border-box;
+
+  border-radius: 999px;
+
+  background: #eaf4ff;
+
+  color: #1976d2;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+
+  gap: 9px;
+}
+
+.history-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  padding: 13px;
+
+  border: 1px solid #e4e8ec;
+  border-radius: 12px;
+
+  background: #ffffff;
+
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.05);
+}
+
+.history-main {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+}
+
+.history-icon {
+  width: 36px;
+  height: 36px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border-radius: 9px;
+
+  background: #fff3bf;
+
+  font-size: 16px;
+}
+
+.history-main strong {
+  display: block;
+
+  color: #263238;
+
+  font-size: 13px;
+}
+
+.history-main span {
+  display: block;
+
+  margin-top: 3px;
+
+  color: #68737d;
+
+  font-size: 11px;
+}
+
+.history-value {
+  text-align: right;
+}
+
+.history-value span {
+  display: block;
+
+  margin-bottom: 3px;
+
+  color: #68737d;
+
+  font-size: 10px;
+}
+
+.history-value strong {
+  color: #1976d2;
+
+  font-size: 13px;
+}
+
+/* =========================================
+   HISTÓRICO VAZIO
+   ========================================= */
+
+.empty-history {
+  padding: 28px 18px;
+
+  text-align: center;
+
+  border: 1px dashed #dce2e7;
+  border-radius: 13px;
+
+  background: #ffffff;
+}
+
+.empty-history-icon {
+  width: 43px;
+  height: 43px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin: 0 auto 10px;
+
+  border-radius: 12px;
+
+  background: #fff3bf;
+
+  font-size: 19px;
+}
+
+.empty-history h3 {
+  margin: 0;
+
+  color: #263238;
+
+  font-size: 14px;
+}
+
+.empty-history p {
+  margin: 5px 0 0;
+
+  color: #68737d;
+
+  font-size: 12px;
+}
+
+/* =========================================
+   CARREGAMENTO
+   ========================================= */
+
+.consumo-loading {
+  min-height: 300px;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  color: #68737d;
+}
+
+.consumo-loading p {
+  margin: 0;
+
+  font-size: 13px;
+}
+
+.loading-circle {
+  width: 28px;
+  height: 28px;
+
+  margin-bottom: 11px;
+
+  border: 3px solid #eaf4ff;
+  border-top-color: #1976d2;
+
+  border-radius: 50%;
+
+  animation: consumo-spin 0.8s linear infinite;
+}
+
+@keyframes consumo-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =========================================
+   CELULARES PEQUENOS
+   ========================================= */
+
+@media (max-width: 380px) {
+  .consumo-content {
+    padding-left: 13px;
+    padding-right: 13px;
+  }
+
+  .consumo-header h1 {
+    font-size: 24px;
+  }
+
+  .form-section {
+    padding: 15px;
+  }
+
+  .period-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .calculation {
+    grid-template-columns: 1fr 1fr;
+  }
+}
