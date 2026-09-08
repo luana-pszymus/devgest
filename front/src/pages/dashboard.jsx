@@ -11,6 +11,17 @@ import {
 export default function Dashboard() {
   const TARIFA_KWH = 1.0; // Valor por kWh
 
+  const [inquilinos, setInquilinos] = useState([]);
+
+  useEffect(() => {
+    fetch("http://localhost:3000/api/inquilinos")
+      .then((res) => res.json())
+      .then((data) => {
+        setInquilinos(data);
+      })
+      .catch((err) => console.error(err));
+  }, []);
+
   // Carrega ou inicializa os dados salvos no celular
   const [kitnets, setKitnets] = useState(() => {
     const salvos = localStorage.getItem("gestao_kitnets");

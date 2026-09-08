@@ -2,7 +2,6 @@ const Contrato = require("../models/contratoModel");
 const Consumo = require("../models/consumoModel");
 const Kitnet = require("../models/kitnetModel");
 const Inquilino = require("../models/inquilinoModel");
-const Kitnet = require("../models/kitnetModel");
 
 // LISTAR TODOS
 exports.listarKitnet = async (req, res) => {

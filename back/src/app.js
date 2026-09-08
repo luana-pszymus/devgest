@@ -4,6 +4,8 @@ const cors = require("cors");
 const consumoRoutes = require("./routes/consumoRoutes");
 const inquilinoRoutes = require("./routes/inquilinoRoutes");
 const contratoRoutes = require("./routes/contratoRoutes");
+const kitnetRoutes = require("./routes/kitnetRoutes");
+const resumoRoutes = require("./routes/resumoRoutes");
 
 const app = express();
 app.use(cors());
@@ -23,5 +25,7 @@ app.get("/api/conteudo", consController.listarConten);
 app.use("/api/consumo", consumoRoutes);
 app.use("/api/inquilino", inquilinoRoutes);
 app.use("/api/contratos", contratoRoutes);
+app.use("/api/kitnet", kitnetRoutes);
+app.use("/api/resumo", resumoRoutes);
 
 module.exports = app;

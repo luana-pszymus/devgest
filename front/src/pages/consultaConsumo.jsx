@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import React from "react";
+import Navbar from "../components/Navbar";
 
 function Consulta() {
   const [consulta, setConsulta] = useState([]);
@@ -27,6 +28,8 @@ function Consulta() {
           </li>
         ))}
       </ul>
+
+      <Navbar />
     </div>
   );
 }

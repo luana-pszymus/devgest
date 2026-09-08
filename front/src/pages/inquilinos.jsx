@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import React from "react";
+import Navbar from "../components/Navbar";
 
 function Inquilinos() {
   const [inquilinos, setInquilinos] = useState([]);
@@ -24,6 +25,8 @@ function Inquilinos() {
           </li>
         ))}
       </ul>
+
+      <Navbar />
     </div>
   );
 }

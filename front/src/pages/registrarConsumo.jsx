@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
+import Navbar from "../components/Navbar";
 
 function RegistrarConsumo() {
   const [contratos, setContratos] = useState([]);
@@ -17,6 +18,15 @@ function RegistrarConsumo() {
     carregarContratos();
     carregarConsumos();
   }, []);
+
+  async function carregarResumo() {
+    try {
+      const { data } = await api.get("/api/resumo/inquilinos");
+      setResumo(data);
+    } catch (error) {
+      console.error("Erro ao carregar resumo:", error);
+    }
+  }
 
   async function carregarContratos() {
     try {
@@ -239,6 +249,8 @@ function RegistrarConsumo() {
           ))}
         </tbody>
       </table>
+
+      <Navbar />
     </div>
   );
 }
