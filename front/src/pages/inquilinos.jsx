@@ -3,11 +3,30 @@ import Navbar from "../components/Navbar";
 import api from "../services/api";
 import "./inquilinos.css";
 
+function formatarMoeda(valor) {
+  return Number(valor || 0).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
+}
+
+function formatarData(data) {
+  if (!data) return "—";
+
+  return new Date(data).toLocaleDateString("pt-BR");
+}
+
 function Inquilinos() {
   const [inquilinos, setInquilinos] = useState([]);
-  const [contratos, setContratos] = useState([]);
+  const [resumo, setResumo] = useState([]);
 
   const [mostrarForm, setMostrarForm] = useState(false);
+  const [mostrarDetalhes, setMostrarDetalhes] =
+    useState(false);
+
+  const [editando, setEditando] = useState(null);
+  const [selecionado, setSelecionado] = useState(null);
+
   const [nome, setNome] = useState("");
   const [telefone, setTelefone] = useState("");
   const [email, setEmail] = useState("");
@@ -22,16 +41,16 @@ function Inquilinos() {
     carregarDados();
   }, []);
 
-  // Busca os inquilinos e contratos
+  // Busca os inquilinos e o resumo
   async function carregarDados() {
     try {
       setCarregando(true);
       setErro("");
 
-      const [inquilinosRes, contratosRes] =
+      const [inquilinosRes, resumoRes] =
         await Promise.all([
           api.get("/api/inquilinos"),
-          api.get("/api/contratos"),
+          api.get("/api/resumo/inquilinos"),
         ]);
 
       setInquilinos(
@@ -40,39 +59,79 @@ function Inquilinos() {
           : [],
       );
 
-      setContratos(
-        Array.isArray(contratosRes.data)
-          ? contratosRes.data
+      setResumo(
+        Array.isArray(resumoRes.data)
+          ? resumoRes.data
           : [],
       );
     } catch (error) {
       console.error(error);
-      setErro(
-        "Não foi possível carregar os inquilinos.",
-      );
+
+      // Tenta carregar pelo menos os inquilinos
+      try {
+        const resposta = await api.get(
+          "/api/inquilinos",
+        );
+
+        setInquilinos(
+          Array.isArray(resposta.data)
+            ? resposta.data
+            : [],
+        );
+      } catch (err) {
+        setErro(
+          "Não foi possível carregar os inquilinos.",
+        );
+      }
     } finally {
       setCarregando(false);
     }
   }
 
-  // Abre o formulário
-  function abrirFormulario() {
-    setMostrarForm(true);
-    setMensagem("");
-    setErro("");
-  }
+  // Abre o formulário para adicionar
+  function novoInquilino() {
+    setEditando(null);
 
-  // Fecha o formulário e limpa os campos
-  function fecharFormulario() {
-    setMostrarForm(false);
     setNome("");
     setTelefone("");
     setEmail("");
+
+    setErro("");
+    setMensagem("");
+
+    setMostrarDetalhes(false);
+    setMostrarForm(true);
+  }
+
+  // Abre o formulário para editar
+  function editarInquilino(inquilino) {
+    setEditando(inquilino);
+
+    setNome(inquilino.nome || "");
+    setTelefone(inquilino.telefone || "");
+    setEmail(inquilino.email || "");
+
+    setErro("");
+    setMensagem("");
+
+    setMostrarDetalhes(false);
+    setMostrarForm(true);
+  }
+
+  // Fecha o formulário
+  function fecharForm() {
+    setMostrarForm(false);
+    setEditando(null);
+
+    setNome("");
+    setTelefone("");
+    setEmail("");
+
     setErro("");
   }
 
-  // Cadastra um novo inquilino
-  async function adicionarInquilino(e) {
+  // Salva um inquilino novo ou editado
+  async function salvarInquilino(e) {
     e.preventDefault();
 
     if (!nome.trim()) {
@@ -83,22 +142,77 @@ function Inquilinos() {
     try {
       setSalvando(true);
       setErro("");
-      setMensagem("");
 
-      await api.post("/api/inquilino/", {
+      const dados = {
         nome: nome.trim(),
         telefone: telefone.trim(),
         email: email.trim(),
-      });
+      };
 
-      setMensagem(
-        "Inquilino cadastrado com sucesso!",
+      if (editando) {
+        await api.put(
+          `/api/inquilino/${editando.id}`,
+          dados,
+        );
+
+        setMensagem(
+          "Inquilino atualizado com sucesso!",
+        );
+      } else {
+        await api.post(
+          "/api/inquilino/",
+          dados,
+        );
+
+        setMensagem(
+          "Inquilino cadastrado com sucesso!",
+        );
+      }
+
+      fecharForm();
+      await carregarDados();
+    } catch (error) {
+      console.error(error);
+
+      setErro(
+        error.response?.data?.erro ||
+          "Não foi possível salvar o inquilino.",
+      );
+    } finally {
+      setSalvando(false);
+    }
+  }
+
+  // Abre os detalhes
+  function abrirDetalhes(inquilino) {
+    setSelecionado(inquilino);
+    setMostrarDetalhes(true);
+    setMostrarForm(false);
+    setErro("");
+  }
+
+  // Exclui um inquilino
+  async function excluirInquilino(inquilino) {
+    const confirmou = window.confirm(
+      `Excluir ${inquilino.nome}?`,
+    );
+
+    if (!confirmou) return;
+
+    try {
+      setErro("");
+      setMensagem("");
+
+      await api.delete(
+        `/api/inquilino/${inquilino.id}`,
       );
 
-      setNome("");
-      setTelefone("");
-      setEmail("");
-      setMostrarForm(false);
+      setMensagem(
+        "Inquilino excluído com sucesso.",
+      );
+
+      setMostrarDetalhes(false);
+      setSelecionado(null);
 
       await carregarDados();
     } catch (error) {
@@ -106,160 +220,224 @@ function Inquilinos() {
 
       setErro(
         error.response?.data?.erro ||
-          "Não foi possível cadastrar o inquilino.",
+          "Não foi possível excluir o inquilino.",
       );
-    } finally {
-      setSalvando(false);
     }
   }
 
-  // Procura a kitnet do inquilino
-  function buscarKitnet(inquilinoId) {
-    const contrato = contratos.find(
-      (item) =>
-        Number(item.inquilino_id) ===
-        Number(inquilinoId),
-    );
-
-    if (!contrato) {
-      return null;
+  // Encerra o contrato atual
+  async function encerrarContrato(dados) {
+    if (!dados?.contrato_id) {
+      setErro("Esse inquilino não possui contrato.");
+      return;
     }
 
-    return contrato.kitnet_id;
+    const confirmou = window.confirm(
+      `Encerrar o contrato de ${dados.nome}?`,
+    );
+
+    if (!confirmou) return;
+
+    try {
+      setErro("");
+      setMensagem("");
+
+      await api.put(
+        `/api/contratos/${dados.contrato_id}`,
+        {
+          inquilinoId: dados.inquilino_id,
+          kitnetId: dados.kitnet_id,
+          dataInicio: dados.data_inicio,
+          dataFim: new Date().toISOString(),
+        },
+      );
+
+      setMensagem(
+        "Contrato encerrado com sucesso.",
+      );
+
+      await carregarDados();
+
+      const novoResumo = resumo.find(
+        (item) =>
+          Number(item.inquilino_id) ===
+          Number(dados.inquilino_id),
+      );
+
+      if (novoResumo) {
+        setSelecionado(
+          inquilinos.find(
+            (item) =>
+              Number(item.id) ===
+              Number(dados.inquilino_id),
+          ),
+        );
+      }
+    } catch (error) {
+      console.error(error);
+
+      setErro(
+        error.response?.data?.erro ||
+          "Não foi possível encerrar o contrato.",
+      );
+    }
+  }
+
+  // Pega as informações extras do inquilino
+  function pegarResumo(id) {
+    return resumo.find(
+      (item) =>
+        Number(item.inquilino_id) ===
+        Number(id),
+    );
   }
 
   return (
-    <div className="app-shell">
-      <header className="simple-header">
-        <div>
-          <p className="eyebrow">GESTNET</p>
+    <div className="app-container">
 
-          <h1>Inquilinos</h1>
+      <main className="main-content">
 
-          <p>
-            Pessoas cadastradas no sistema
-          </p>
-        </div>
+        {/* Cabeçalho */}
+        <header className="tenant-header">
+          <div>
+            <span className="tenant-eyebrow">
+              GESTÃO
+            </span>
 
-        <button
-          className="add-button"
-          onClick={abrirFormulario}
-          type="button"
-        >
-          +
-        </button>
-      </header>
+            <h1 className="page-title">
+              Inquilinos
+            </h1>
 
-      <main className="page-content">
+            <p className="page-subtitle">
+              Pessoas cadastradas e seus contratos.
+            </p>
+          </div>
 
+          <button
+            className="tenant-add"
+            onClick={novoInquilino}
+            type="button"
+          >
+            +
+          </button>
+        </header>
+
+        {/* Mensagens */}
         {erro && (
-          <div className="error-banner">
+          <div className="tenant-message error">
             {erro}
           </div>
         )}
 
         {mensagem && (
-          <div className="success-banner">
+          <div className="tenant-message success">
             ✓ {mensagem}
           </div>
         )}
 
-        {/* Formulário de novo inquilino */}
+        {/* Formulário */}
         {mostrarForm && (
-          <form
-            className="tenant-form"
-            onSubmit={adicionarInquilino}
-          >
-            <div className="form-header">
-              <div>
-                <h2>Novo inquilino</h2>
+          <section className="tenant-form card">
 
-                <p>
-                  Cadastre os dados da pessoa.
-                </p>
+            <div className="form-top">
+              <div>
+                <span className="form-label-small">
+                  {editando
+                    ? "EDITAR"
+                    : "NOVO CADASTRO"}
+                </span>
+
+                <h2>
+                  {editando
+                    ? "Editar inquilino"
+                    : "Novo inquilino"}
+                </h2>
               </div>
 
               <button
                 type="button"
                 className="close-button"
-                onClick={fecharFormulario}
+                onClick={fecharForm}
               >
                 ×
               </button>
             </div>
 
-            <label>
-              Nome
+            <form onSubmit={salvarInquilino}>
 
-              <input
-                type="text"
-                value={nome}
-                onChange={(e) =>
-                  setNome(e.target.value)
-                }
-                placeholder="Nome completo"
-                required
-              />
-            </label>
+              <div className="form-group">
+                <label className="form-label">
+                  Nome
+                </label>
 
-            <label>
-              Telefone
+                <input
+                  className="form-input"
+                  type="text"
+                  value={nome}
+                  onChange={(e) =>
+                    setNome(e.target.value)
+                  }
+                  placeholder="Nome completo"
+                  required
+                />
+              </div>
 
-              <input
-                type="tel"
-                value={telefone}
-                onChange={(e) =>
-                  setTelefone(e.target.value)
-                }
-                placeholder="(42) 99999-9999"
-              />
-            </label>
+              <div className="form-group">
+                <label className="form-label">
+                  Telefone
+                </label>
 
-            <label>
-              E-mail
+                <input
+                  className="form-input"
+                  type="tel"
+                  value={telefone}
+                  onChange={(e) =>
+                    setTelefone(e.target.value)
+                  }
+                  placeholder="(42) 99999-9999"
+                />
+              </div>
 
-              <input
-                type="email"
-                value={email}
-                onChange={(e) =>
-                  setEmail(e.target.value)
-                }
-                placeholder="email@exemplo.com"
-              />
-            </label>
+              <div className="form-group">
+                <label className="form-label">
+                  E-mail
+                </label>
 
-            <button
-              type="submit"
-              className="save-button"
-              disabled={salvando}
-            >
-              {salvando
-                ? "Salvando..."
-                : "Cadastrar inquilino"}
-            </button>
-          </form>
+                <input
+                  className="form-input"
+                  type="email"
+                  value={email}
+                  onChange={(e) =>
+                    setEmail(e.target.value)
+                  }
+                  placeholder="email@exemplo.com"
+                />
+              </div>
+
+              <button
+                className="btn btn-primary"
+                type="submit"
+                disabled={salvando}
+              >
+                {salvando
+                  ? "Salvando..."
+                  : editando
+                    ? "Salvar alterações"
+                    : "Cadastrar inquilino"}
+              </button>
+
+            </form>
+          </section>
         )}
 
-        <div className="tenant-list-header">
-          <div>
-            <strong>
-              {inquilinos.length}
-            </strong>
-
-            <span>
-              {inquilinos.length === 1
-                ? " inquilino cadastrado"
-                : " inquilinos cadastrados"}
-            </span>
-          </div>
-        </div>
-
+        {/* Lista */}
         {carregando ? (
-          <div className="empty-card">
-            <span>Carregando...</span>
+          <div className="tenant-empty card">
+            <span>Carregando inquilinos...</span>
           </div>
         ) : inquilinos.length === 0 ? (
-          <div className="empty-card">
+          <div className="tenant-empty card">
+
             <div className="empty-icon">
               👤
             </div>
@@ -269,63 +447,349 @@ function Inquilinos() {
             </strong>
 
             <span>
-              Clique no botão + para adicionar o
-              primeiro.
+              Use o botão + para cadastrar o primeiro.
             </span>
+
           </div>
         ) : (
-          <div className="tenant-list">
+          <>
+            <div className="tenant-count">
+              <strong>
+                {inquilinos.length}
+              </strong>
 
-            {inquilinos.map((inquilino) => {
-              const kitnet = buscarKitnet(
-                inquilino.id,
-              );
+              <span>
+                {inquilinos.length === 1
+                  ? " inquilino cadastrado"
+                  : " inquilinos cadastrados"}
+              </span>
+            </div>
 
-              return (
-                <article
-                  className="tenant-card"
-                  key={inquilino.id}
-                >
-                  <div className="tenant-avatar">
-                    👤
-                  </div>
+            <section className="tenant-list">
 
-                  <div className="tenant-info">
-                    <h2>
-                      {inquilino.nome}
-                    </h2>
+              {inquilinos.map((inquilino) => {
+                const dados = pegarResumo(
+                  inquilino.id,
+                );
 
-                    {kitnet && (
-                      <div className="tenant-kitnet">
-                        🏠 Kitnet {kitnet}
+                const ativo =
+                  dados?.data_fim == null;
+
+                return (
+                  <article
+                    className="tenant-card card"
+                    key={inquilino.id}
+                  >
+
+                    <div className="tenant-card-top">
+
+                      <div className="tenant-avatar">
+                        👤
+                      </div>
+
+                      <div className="tenant-name">
+                        <h2>
+                          {inquilino.nome}
+                        </h2>
+
+                        <span
+                          className={
+                            ativo
+                              ? "status status-active"
+                              : "status status-ended"
+                          }
+                        >
+                          {ativo
+                            ? "Contrato ativo"
+                            : "Contrato encerrado"}
+                        </span>
+                      </div>
+
+                    </div>
+
+                    <div className="tenant-info">
+
+                      {dados?.kitnet_numero && (
+                        <div className="info-line">
+                          <span>🏠</span>
+
+                          <strong>
+                            Kitnet{" "}
+                            {dados.kitnet_numero}
+                          </strong>
+                        </div>
+                      )}
+
+                      {inquilino.telefone && (
+                        <div className="info-line">
+                          <span>📞</span>
+
+                          <span>
+                            {inquilino.telefone}
+                          </span>
+                        </div>
+                      )}
+
+                      {inquilino.email && (
+                        <div className="info-line">
+                          <span>✉️</span>
+
+                          <span>
+                            {inquilino.email}
+                          </span>
+                        </div>
+                      )}
+
+                    </div>
+
+                    {dados?.consumo && (
+                      <div className="last-consumption">
+
+                        <div>
+                          <span>
+                            Último consumo
+                          </span>
+
+                          <strong>
+                            {dados.consumo.consumo_kwh}{" "}
+                            kWh
+                          </strong>
+                        </div>
+
+                        <div>
+                          <span>
+                            Energia
+                          </span>
+
+                          <strong>
+                            {formatarMoeda(
+                              dados.consumo
+                                .valor_energia,
+                            )}
+                          </strong>
+                        </div>
+
                       </div>
                     )}
 
-                    {inquilino.telefone ? (
-                      <p>
-                        📞 {inquilino.telefone}
-                      </p>
-                    ) : (
-                      <p className="muted">
-                        Telefone não informado
-                      </p>
-                    )}
+                    <div className="tenant-actions">
 
-                    {inquilino.email && (
-                      <small>
-                        {inquilino.email}
-                      </small>
-                    )}
-                  </div>
-                </article>
-              );
-            })}
+                      <button
+                        className="action-button primary"
+                        type="button"
+                        onClick={() =>
+                          abrirDetalhes(
+                            inquilino,
+                          )
+                        }
+                      >
+                        Ver detalhes
+                      </button>
 
-          </div>
+                      <button
+                        className="action-button"
+                        type="button"
+                        onClick={() =>
+                          editarInquilino(
+                            inquilino,
+                          )
+                        }
+                      >
+                        Editar
+                      </button>
+
+                    </div>
+
+                  </article>
+                );
+              })}
+
+            </section>
+          </>
         )}
+
       </main>
 
+      {/* Detalhes */}
+      {mostrarDetalhes && selecionado && (
+        <div className="modal-background">
+
+          <section className="tenant-modal">
+
+            <div className="modal-header">
+
+              <div className="modal-person">
+                <div className="tenant-avatar large">
+                  👤
+                </div>
+
+                <div>
+                  <span className="tenant-eyebrow">
+                    INQUILINO
+                  </span>
+
+                  <h2>
+                    {selecionado.nome}
+                  </h2>
+                </div>
+              </div>
+
+              <button
+                className="close-button"
+                type="button"
+                onClick={() =>
+                  setMostrarDetalhes(false)
+                }
+              >
+                ×
+              </button>
+
+            </div>
+
+            {(() => {
+              const dados = pegarResumo(
+                selecionado.id,
+              );
+
+              const ativo =
+                dados?.data_fim == null;
+
+              return (
+                <>
+                  <div className="detail-box">
+
+                    <h3>Dados</h3>
+
+                    <div className="detail-line">
+                      <span>Telefone</span>
+                      <strong>
+                        {selecionado.telefone ||
+                          "Não informado"}
+                      </strong>
+                    </div>
+
+                    <div className="detail-line">
+                      <span>E-mail</span>
+                      <strong>
+                        {selecionado.email ||
+                          "Não informado"}
+                      </strong>
+                    </div>
+
+                  </div>
+
+                  <div className="detail-box">
+
+                    <h3>Contrato</h3>
+
+                    {dados ? (
+                      <>
+                        <div className="detail-line">
+                          <span>Kitnet</span>
+
+                          <strong>
+                            Kitnet{" "}
+                            {dados.kitnet_numero}
+                          </strong>
+                        </div>
+
+                        <div className="detail-line">
+                          <span>Início</span>
+
+                          <strong>
+                            {formatarData(
+                              dados.data_inicio,
+                            )}
+                          </strong>
+                        </div>
+
+                        <div className="detail-line">
+                          <span>Fim</span>
+
+                          <strong>
+                            {dados.data_fim
+                              ? formatarData(
+                                  dados.data_fim,
+                                )
+                              : "Contrato ativo"}
+                          </strong>
+                        </div>
+
+                        {dados.consumo && (
+                          <div className="detail-line">
+                            <span>
+                              Último consumo
+                            </span>
+
+                            <strong>
+                              {
+                                dados.consumo
+                                  .consumo_kwh
+                              }{" "}
+                              kWh
+                            </strong>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <p className="detail-empty">
+                        Nenhum contrato encontrado.
+                      </p>
+                    )}
+
+                  </div>
+
+                  <div className="modal-actions">
+
+                    <button
+                      className="btn btn-secondary"
+                      type="button"
+                      onClick={() =>
+                        editarInquilino(
+                          selecionado,
+                        )
+                      }
+                    >
+                      ✏️ Editar dados
+                    </button>
+
+                    {dados && ativo && (
+                      <button
+                        className="btn btn-warning"
+                        type="button"
+                        onClick={() =>
+                          encerrarContrato(
+                            dados,
+                          )
+                        }
+                      >
+                        🚪 Encerrar contrato
+                      </button>
+                    )}
+
+                    <button
+                      className="btn btn-danger"
+                      type="button"
+                      onClick={() =>
+                        excluirInquilino(
+                          selecionado,
+                        )
+                      }
+                    >
+                      🗑️ Excluir inquilino
+                    </button>
+
+                  </div>
+                </>
+              );
+            })()}
+
+          </section>
+        </div>
+      )}
+
       <Navbar />
+
     </div>
   );
 }
