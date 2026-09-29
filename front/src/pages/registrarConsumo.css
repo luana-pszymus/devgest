@@ -799,3 +799,188 @@
     grid-template-columns: 1fr 1fr;
   }
 }
+/* =========================================
+   CÂMERA
+   ========================================= */
+
+.camera-button {
+  width: 45px;
+  height: 45px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border: none;
+  border-radius: 13px;
+
+  background: #fff3bf;
+
+  font-size: 20px;
+
+  cursor: pointer;
+}
+
+.camera-button input {
+  display: none;
+}
+
+.camera-button:active {
+  transform: scale(0.96);
+}
+
+
+/* =========================================
+   FOTO DO MEDIDOR
+   ========================================= */
+
+.photo-card {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  margin-bottom: 12px;
+  padding: 12px;
+
+  border: 1px solid #e4e8ec;
+  border-radius: 12px;
+
+  background: #ffffff;
+}
+
+.photo-card div {
+  flex: 1;
+}
+
+.photo-card strong {
+  display: block;
+
+  color: #263238;
+
+  font-size: 13px;
+}
+
+.photo-card span {
+  display: block;
+
+  margin-top: 3px;
+
+  color: #68737d;
+
+  font-size: 10px;
+}
+
+.photo-card img {
+  width: 58px;
+  height: 58px;
+
+  object-fit: cover;
+
+  border-radius: 9px;
+}
+
+
+/* =========================================
+   FILTRO DO HISTÓRICO
+   ========================================= */
+
+.history-filter {
+  margin-bottom: 12px;
+  padding: 12px;
+
+  border: 1px solid #e4e8ec;
+  border-radius: 12px;
+
+  background: #ffffff;
+}
+
+.history-filter label {
+  display: block;
+
+  margin-bottom: 6px;
+
+  color: #4d5a63;
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+
+/* =========================================
+   HISTÓRICO
+   ========================================= */
+
+.history-card {
+  align-items: center;
+}
+
+.history-main {
+  min-width: 0;
+}
+
+.history-main > div:last-child {
+  min-width: 0;
+}
+
+.history-main span {
+  max-width: 190px;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+.history-main small {
+  display: block;
+
+  margin-top: 3px;
+
+  color: #1976d2;
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.history-right {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  flex-shrink: 0;
+}
+
+.delete-button {
+  width: 34px;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border: 1px solid #f0d6d6;
+  border-radius: 9px;
+
+  background: #fff6f6;
+
+  color: #a73532;
+
+  cursor: pointer;
+}
+
+.delete-button:active {
+  transform: scale(0.95);
+}
+
+.delete-button:disabled {
+  opacity: 0.5;
+
+  cursor: wait;
+}
