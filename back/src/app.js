@@ -6,6 +6,7 @@ const inquilinoRoutes = require("./routes/inquilinoRoutes");
 const contratoRoutes = require("./routes/contratoRoutes");
 const kitnetRoutes = require("./routes/kitnetRoutes");
 const resumoRoutes = require("./routes/resumoRoutes");
+const loginRoutes = require("./routes/loginRoutes");
 
 const app = express();
 app.use(cors());
@@ -27,5 +28,6 @@ app.use("/api/inquilino", inquilinoRoutes);
 app.use("/api/contratos", contratoRoutes);
 app.use("/api/kitnet", kitnetRoutes);
 app.use("/api/resumo", resumoRoutes);
+app.use("/api", loginRoutes);
 
 module.exports = app;

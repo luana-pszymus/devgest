@@ -7,6 +7,7 @@ require("./src/models/kitnetModel");
 require("./src/models/inquilinoModel");
 require("./src/models/referenciasModel");
 require("./src/models/contratoModel");
+require("./src/models/loginModel");
 
 const PORT = process.env.PORT || 3000;
 
