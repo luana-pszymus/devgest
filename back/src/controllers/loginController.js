@@ -1,4 +1,4 @@
-const Usuario = require("../models/usuarioModel");
+const Usuario = require("../models/loginModel");
 
 // LOGIN
 exports.login = async (req, res) => {
