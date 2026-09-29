@@ -30,9 +30,7 @@ function Consulta() {
   const [contratos, setContratos] = useState([]);
   const [inquilinos, setInquilinos] = useState([]);
 
-  const [filtroInquilino, setFiltroInquilino] =
-    useState("");
-
+  const [filtroInquilino, setFiltroInquilino] = useState("");
   const [filtroMes, setFiltroMes] = useState("");
   const [filtroAno, setFiltroAno] = useState("");
 
@@ -43,7 +41,7 @@ function Consulta() {
     carregarDados();
   }, []);
 
-  // Busca os dados usados no histórico
+  // Busca os dados usados no histórico.
   async function carregarDados() {
     try {
       setCarregando(true);
@@ -62,58 +60,58 @@ function Consulta() {
       setConsumos(
         Array.isArray(consumosResponse.data)
           ? consumosResponse.data
-          : [],
+          : []
       );
 
       setContratos(
         Array.isArray(contratosResponse.data)
           ? contratosResponse.data
-          : [],
+          : []
       );
 
       setInquilinos(
         Array.isArray(inquilinosResponse.data)
           ? inquilinosResponse.data
-          : [],
+          : []
       );
     } catch (error) {
       console.error(error);
+
       setErro(
-        "Não foi possível carregar o histórico.",
+        "Não foi possível carregar o histórico."
       );
     } finally {
       setCarregando(false);
     }
   }
 
-  // Encontra o contrato de um consumo
+  // Encontra o contrato de um consumo.
   function buscarContrato(contratoId) {
     return contratos.find(
       (contrato) =>
-        Number(contrato.id) ===
-        Number(contratoId),
+        Number(contrato.id) === Number(contratoId)
     );
   }
 
-  // Encontra o nome do inquilino
+  // Encontra o inquilino de um consumo.
   function buscarInquilino(contratoId) {
     const contrato = buscarContrato(contratoId);
 
     return inquilinos.find(
       (inquilino) =>
         Number(inquilino.id) ===
-        Number(contrato?.inquilino_id),
+        Number(contrato?.inquilino_id)
     );
   }
 
-  // Filtra os registros
+  // Filtra os registros.
   const historico = useMemo(() => {
     return consumos
       .filter((consumo) => {
-        // Filtro por inquilino
+        
         if (filtroInquilino) {
           const contrato = buscarContrato(
-            consumo.contrato_id,
+            consumo.contrato_id
           );
 
           if (
@@ -124,20 +122,18 @@ function Consulta() {
           }
         }
 
-        // Filtro por mês
+
         if (
           filtroMes &&
-          Number(consumo.mes) !==
-            Number(filtroMes)
+          Number(consumo.mes) !== Number(filtroMes)
         ) {
           return false;
         }
 
-        // Filtro por ano
+
         if (
           filtroAno &&
-          Number(consumo.ano) !==
-            Number(filtroAno)
+          Number(consumo.ano) !== Number(filtroAno)
         ) {
           return false;
         }
@@ -159,42 +155,55 @@ function Consulta() {
     filtroAno,
   ]);
 
-  // Soma o consumo mostrado
+  // Soma o consumo mostrado.
   const totalKwh = historico.reduce(
     (total, consumo) =>
       total + Number(consumo.consumo_kwh || 0),
-    0,
+    0
   );
 
-  // Soma o valor da energia mostrada
+  // Soma o valor da energia mostrada.
   const totalEnergia = historico.reduce(
     (total, consumo) =>
       total + Number(consumo.valor_energia || 0),
-    0,
+    0
   );
 
-  // Cria uma lista dos anos encontrados
+  // Cria a lista de anos existentes.
   const anos = [
     ...new Set(
-      consumos.map((consumo) =>
-        Number(consumo.ano),
-      ),
+      consumos.map((consumo) => Number(consumo.ano))
     ),
   ].sort((a, b) => b - a);
+
+  // Limpa todos os filtros.
+  function limparFiltros() {
+    setFiltroInquilino("");
+    setFiltroMes("");
+    setFiltroAno("");
+  }
+
+  const possuiFiltro =
+    filtroInquilino ||
+    filtroMes ||
+    filtroAno;
 
   return (
     <div className="history-page">
 
       <main className="history-content">
 
-        {/* Cabeçalho */}
+        {/* CABEÇALHO */}
         <header className="history-header">
+
           <div>
             <span className="history-eyebrow">
               REGISTROS
             </span>
 
-            <h1>Histórico</h1>
+            <h1>
+              Histórico
+            </h1>
 
             <p>
               Consulte os consumos registrados.
@@ -204,10 +213,12 @@ function Consulta() {
           <button
             className="history-refresh"
             onClick={carregarDados}
-            title="Atualizar"
+            type="button"
+            title="Atualizar histórico"
           >
             ↻
           </button>
+
         </header>
 
         {erro && (
@@ -217,55 +228,105 @@ function Consulta() {
         )}
 
         {carregando ? (
+
           <div className="history-loading">
+
             <div className="history-spinner"></div>
 
-            <p>Carregando histórico...</p>
+            <p>
+              Carregando histórico...
+            </p>
+
           </div>
+
         ) : (
+
           <>
-            {/* Filtros */}
+
+            {/* FILTROS */}
             <section className="history-filters">
 
+              <div className="filter-heading">
+
+                <div>
+                  <span className="filter-icon">
+                    🔎
+                  </span>
+
+                  <div>
+                    <strong>
+                      Filtrar registros
+                    </strong>
+
+                    <span>
+                      Escolha o que deseja consultar.
+                    </span>
+                  </div>
+                </div>
+
+                {possuiFiltro && (
+                  <button
+                    type="button"
+                    className="clear-filter"
+                    onClick={limparFiltros}
+                  >
+                    Limpar
+                  </button>
+                )}
+
+              </div>
+
               <div className="filter-group filter-full">
-                <label>Inquilino</label>
+
+                <label>
+                  Inquilino
+                </label>
 
                 <select
                   value={filtroInquilino}
                   onChange={(e) =>
                     setFiltroInquilino(
-                      e.target.value,
+                      e.target.value
                     )
                   }
                 >
+
                   <option value="">
                     Todos os inquilinos
                   </option>
 
-                  {inquilinos.map((inquilino) => (
-                    <option
-                      key={inquilino.id}
-                      value={inquilino.id}
-                    >
-                      {inquilino.nome}
-                    </option>
-                  ))}
+                  {inquilinos.map(
+                    (inquilino) => (
+                      <option
+                        key={inquilino.id}
+                        value={inquilino.id}
+                      >
+                        {inquilino.nome}
+                      </option>
+                    )
+                  )}
+
                 </select>
+
               </div>
 
               <div className="filter-row">
 
                 <div className="filter-group">
-                  <label>Mês</label>
+
+                  <label>
+                    Mês
+                  </label>
 
                   <select
                     value={filtroMes}
                     onChange={(e) =>
                       setFiltroMes(
-                        e.target.value,
+                        e.target.value
                       )
                     }
                   >
+
                     <option value="">
                       Todos
                     </option>
@@ -278,22 +339,28 @@ function Consulta() {
                         >
                           {mes}
                         </option>
-                      ),
+                      )
                     )}
+
                   </select>
+
                 </div>
 
                 <div className="filter-group">
-                  <label>Ano</label>
+
+                  <label>
+                    Ano
+                  </label>
 
                   <select
                     value={filtroAno}
                     onChange={(e) =>
                       setFiltroAno(
-                        e.target.value,
+                        e.target.value
                       )
                     }
                   >
+
                     <option value="">
                       Todos
                     </option>
@@ -306,51 +373,82 @@ function Consulta() {
                         {ano}
                       </option>
                     ))}
+
                   </select>
+
                 </div>
 
               </div>
 
             </section>
 
-            {/* Resumo */}
+            {/* RESUMO */}
             <section className="history-summary">
 
-              <div className="history-summary-card">
-                <span>Consumo</span>
+              <div className="history-summary-card energy">
 
-                <strong>
-                  {totalKwh.toFixed(2)} kWh
-                </strong>
+                <div className="summary-icon">
+                  ⚡
+                </div>
+
+                <div>
+                  <span>
+                    Consumo
+                  </span>
+
+                  <strong>
+                    {totalKwh.toFixed(2)} kWh
+                  </strong>
+                </div>
+
               </div>
 
-              <div className="history-summary-card">
-                <span>Energia</span>
+              <div className="history-summary-card money">
 
-                <strong>
-                  {formatarMoeda(
-                    totalEnergia,
-                  )}
-                </strong>
+                <div className="summary-icon">
+                  R$
+                </div>
+
+                <div>
+                  <span>
+                    Energia
+                  </span>
+
+                  <strong>
+                    {formatarMoeda(totalEnergia)}
+                  </strong>
+                </div>
+
               </div>
 
             </section>
 
-            {/* Quantidade */}
+            {/* RESULTADO */}
             <div className="history-result">
-              <strong>
-                {historico.length}
-              </strong>
 
-              <span>
-                {historico.length === 1
-                  ? " registro encontrado"
-                  : " registros encontrados"}
-              </span>
+              <div>
+                <strong>
+                  {historico.length}
+                </strong>
+
+                <span>
+                  {historico.length === 1
+                    ? " registro encontrado"
+                    : " registros encontrados"}
+                </span>
+              </div>
+
+              {possuiFiltro && (
+                <span className="filtered-label">
+                  Filtros ativos
+                </span>
+              )}
+
             </div>
 
-            {/* Lista */}
+            {/* LISTA */}
             {historico.length === 0 ? (
+
               <div className="history-empty">
 
                 <div className="empty-icon">
@@ -367,18 +465,21 @@ function Consulta() {
                 </p>
 
               </div>
+
             ) : (
+
               <section className="history-list">
 
                 {historico.map((consumo) => {
+
                   const contrato =
                     buscarContrato(
-                      consumo.contrato_id,
+                      consumo.contrato_id
                     );
 
                   const inquilino =
                     buscarInquilino(
-                      consumo.contrato_id,
+                      consumo.contrato_id
                     );
 
                   return (
@@ -389,54 +490,68 @@ function Consulta() {
 
                       <div className="history-item-top">
 
-                        <div>
-                          <span className="history-month">
-                            {MESES[
-                              Number(
-                                consumo.mes,
-                              ) - 1
-                            ]}{" "}
-                            {consumo.ano}
-                          </span>
+                        <div className="history-person">
 
-                          <h2>
-                            {inquilino?.nome ||
-                              "Inquilino não identificado"}
-                          </h2>
+                          <div className="history-avatar">
+                            👤
+                          </div>
 
-                          <p>
-                            🏠 Kitnet{" "}
-                            {contrato?.kitnet_id ||
-                              "-"}
-                          </p>
+                          <div>
+
+                            <span className="history-month">
+                              {MESES[
+                                Number(consumo.mes) - 1
+                              ]}{" "}
+                              {consumo.ano}
+                            </span>
+
+                            <h2>
+                              {inquilino?.nome ||
+                                "Inquilino não identificado"}
+                            </h2>
+
+                            <p>
+                              🏠 Kitnet{" "}
+                              {contrato?.kitnet_id || "-"}
+                            </p>
+
+                          </div>
+
                         </div>
 
                         <div className="history-kwh">
+
                           <strong>
                             {Number(
-                              consumo.consumo_kwh ||
-                                0,
+                              consumo.consumo_kwh || 0
                             ).toFixed(2)}
                           </strong>
 
                           <span>
                             kWh
                           </span>
+
                         </div>
 
                       </div>
 
                       <div className="history-item-bottom">
 
-                        <span>
-                          Valor da energia
-                        </span>
+                        <div>
+                          <span>
+                            Valor da energia
+                          </span>
 
-                        <strong>
-                          {formatarMoeda(
-                            consumo.valor_energia,
-                          )}
-                        </strong>
+                          <strong>
+                            {formatarMoeda(
+                              consumo.valor_energia
+                            )}
+                          </strong>
+                        </div>
+
+                        <span className="energy-tag">
+                          ⚡ Energia
+                        </span>
 
                       </div>
 
@@ -446,12 +561,14 @@ function Consulta() {
 
               </section>
             )}
+
           </>
         )}
 
       </main>
 
       <Navbar />
+
     </div>
   );
 }
