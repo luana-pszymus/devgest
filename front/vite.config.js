@@ -7,6 +7,6 @@ export default defineConfig({
 
   server: {
     host: true,
-    allowedHosts: ["ing-joined-brain-customize.trycloudflare.com"],
+    allowedHosts: ["reynolds-mba-slope-assist.trycloudflare.com"],
   },
 });

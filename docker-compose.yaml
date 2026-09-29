@@ -1,0 +1,60 @@
+services:
+  #BANCO LOCAL - autenticação,usuários,auditoria
+
+  postgres_local:
+    image: postgres:15-alpine
+    container_name: gestnetdb
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: softwaredb
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d softwaredb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - gest-net
+
+  #=============================================================================================
+
+  backend:
+    networks:
+      - gest-net
+    build:
+      context: ./back #pasta
+      dockerfile: Dockerfile
+    container_name: gestnet-back
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres_local:
+        condition: service_healthy
+    command: node server.js
+    restart: unless-stopped
+
+  #============================================================================================
+  frontend:
+    build:
+      context: ./front/gestnet
+      dockerfile: Dockerfile
+    container_name: gestnet-front
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    networks:
+      - gest-net
+    command: npm run dev -- --host
+    restart: unless-stopped
+
+networks:
+  gest-net:
+    driver: bridge
+    enable_ipv6: false
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+          gateway: 172.28.0.1
