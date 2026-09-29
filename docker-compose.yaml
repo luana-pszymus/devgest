@@ -26,7 +26,7 @@ services:
     build:
       context: ./back #pasta
       dockerfile: Dockerfile
-    container_name: gestnet-back
+    container_name: gestdev-back
     ports:
       - "3000:3000"
     depends_on:
@@ -38,16 +38,15 @@ services:
   #============================================================================================
   frontend:
     build:
-      context: ./front/gestnet
+      context: ./front
       dockerfile: Dockerfile
-    container_name: gestnet-front
+    container_name: gestdev-front
     ports:
-      - "5173:5173"
+      - "5173:80"
     depends_on:
       - backend
     networks:
       - gest-net
-    command: npm run dev -- --host
     restart: unless-stopped
 
 networks:
