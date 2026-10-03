@@ -5,6 +5,7 @@ import Dashboard from "../pages/dashboard";
 import Inquilinos from "../pages/inquilinos";
 import Consulta from "../pages/consultaConsumo";
 import RegistrarConsumo from "../pages/registrarConsumo";
+import Login from "../pages/login";
 // import Energia from "../pages/Energia";
 
 function AppRoutes() {
@@ -15,6 +16,7 @@ function AppRoutes() {
         <Route path="/inquilinos" element={<Inquilinos />} />
         <Route path="/consulta" element={<Consulta />} />
         <Route path="/registro" element={<RegistrarConsumo />} />
+        <Route path="/login" element={<Login />} />
         {/* <Route path="/energia" element={<Energia />} /> */}
       </Routes>
     </BrowserRouter>

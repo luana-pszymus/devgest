@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
+import api from "../services/api";
 import "./dashboard.css";
 
 const MESES = [
@@ -48,28 +49,16 @@ export default function Dashboard() {
         inquilinosResponse,
         consumosResponse,
       ] = await Promise.all([
-        fetch("http://localhost:3000/api/kitnet"),
-        fetch("http://localhost:3000/api/contratos"),
-        fetch("http://localhost:3000/api/inquilinos"),
-        fetch("http://localhost:3000/api/consumo/listar"),
+        api.get("/api/kitnet"),
+        api.get("/api/contratos"),
+        api.get("/api/inquilinos"),
+        api.get("/api/consumo/listar"),
       ]);
 
-      if (
-        !kitnetsResponse.ok ||
-        !contratosResponse.ok ||
-        !inquilinosResponse.ok ||
-        !consumosResponse.ok
-      ) {
-        throw new Error("Não foi possível carregar os dados.");
-      }
-
-      const [kitnetsData, contratosData, inquilinosData, consumosData] =
-        await Promise.all([
-          kitnetsResponse.json(),
-          contratosResponse.json(),
-          inquilinosResponse.json(),
-          consumosResponse.json(),
-        ]);
+      const kitnetsData = kitnetsResponse.data;
+      const contratosData = contratosResponse.data;
+      const inquilinosData = inquilinosResponse.data;
+      const consumosData = consumosResponse.data;
 
       setKitnets(Array.isArray(kitnetsData) ? kitnetsData : []);
       setContratos(Array.isArray(contratosData) ? contratosData : []);

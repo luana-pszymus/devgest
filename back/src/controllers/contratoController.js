@@ -11,10 +11,11 @@ exports.listarContratos = async (req, res) => {
   }
 };
 
-//busca contrato por id
+// Buscar contrato por ID
 exports.listarContratoId = async (req, res) => {
   try {
     const { id } = req.params;
+
     const contrato = await Contrato.findByPk(id);
 
     if (!contrato) {
@@ -28,29 +29,34 @@ exports.listarContratoId = async (req, res) => {
   }
 };
 
-//cadastrar contrato
+// Cadastrar contrato
 exports.cadastrarContrato = async (req, res) => {
   try {
     const { inquilinoId, kitnetId, dataInicio, dataFim } = req.body;
 
     const contrato = await Contrato.create({
-      inquilinoId,
-      kitnetId,
-      dataInicio,
-      dataFim,
+      inquilino_id: inquilinoId,
+      kitnet_id: kitnetId,
+      data_inicio: dataInicio,
+      data_fim: dataFim,
     });
 
     res.status(201).json(contrato);
   } catch (err) {
     console.error(err);
-    res.status(500).send("Erro ao cadastrar contrato");
+
+    res.status(500).json({
+      erro: "Erro ao cadastrar contrato",
+      detalhes: err.message,
+    });
   }
 };
 
-//editar contrato
+// Editar contrato
 exports.atualizarContrato = async (req, res) => {
   try {
     const { id } = req.params;
+
     const { inquilinoId, kitnetId, dataInicio, dataFim } = req.body;
 
     const contrato = await Contrato.findByPk(id);
@@ -60,10 +66,10 @@ exports.atualizarContrato = async (req, res) => {
     }
 
     await contrato.update({
-      inquilinoId,
-      kitnetId,
-      dataInicio,
-      dataFim,
+      inquilino_id: inquilinoId,
+      kitnet_id: kitnetId,
+      data_inicio: dataInicio,
+      data_fim: dataFim,
     });
 
     res.json({
@@ -72,14 +78,19 @@ exports.atualizarContrato = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).send("Erro ao atualizar contrato");
+
+    res.status(500).json({
+      erro: "Erro ao atualizar contrato",
+      detalhes: err.message,
+    });
   }
 };
 
-//excluir contrato
+// Excluir contrato
 exports.excluirContrato = async (req, res) => {
   try {
     const { id } = req.params;
+
     const contrato = await Contrato.findByPk(id);
 
     if (!contrato) {
@@ -87,9 +98,16 @@ exports.excluirContrato = async (req, res) => {
     }
 
     await contrato.destroy();
-    res.json({ mensagem: "Contrato excluído com sucesso" });
+
+    res.json({
+      mensagem: "Contrato excluído com sucesso",
+    });
   } catch (err) {
     console.error(err);
-    res.status(500).send("Erro ao excluir contrato");
+
+    res.status(500).json({
+      erro: "Erro ao excluir contrato",
+      detalhes: err.message,
+    });
   }
 };
