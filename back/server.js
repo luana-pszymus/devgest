@@ -8,6 +8,7 @@ require("./src/models/inquilinoModel");
 require("./src/models/referenciasModel");
 require("./src/models/contratoModel");
 require("./src/models/loginModel");
+require("dotenv").config();
 
 const PORT = process.env.PORT || 3000;
 
