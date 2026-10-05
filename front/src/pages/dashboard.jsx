@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import api from "../services/api";
 import "./dashboard.css";
+import { useNavigate } from "react-router-dom";
 
 const MESES = [
   "Janeiro",
@@ -43,6 +44,15 @@ export default function Dashboard() {
   const [mensagemKitnet, setMensagemKitnet] = useState("");
   const [erroKitnet, setErroKitnet] = useState("");
 
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("usuario");
+    localStorage.removeItem("token");
+
+    navigate("/login");
+  };
+
   useEffect(() => {
     carregarDados();
   }, []);
@@ -58,9 +68,9 @@ export default function Dashboard() {
         inquilinosResponse,
         consumosResponse,
       ] = await Promise.all([
-        api.get("/api/kitnet"),
+        api.get("/api/kitnet/listar"),
         api.get("/api/contratos"),
-        api.get("/api/inquilinos"),
+        api.get("/api/inquilino/listar"),
         api.get("/api/consumo/listar"),
       ]);
 
@@ -165,22 +175,12 @@ export default function Dashboard() {
     try {
       setSalvandoKitnet(true);
 
-      const response = await fetch("http://localhost:3000/api/kitnet", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          numero,
-          valor_aluguel: valor,
-        }),
+      const response = await api.post("/api/kitnet", {
+        numero,
+        valor_aluguel: valor,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data?.erro || "Não foi possível cadastrar a kitnet.");
-      }
+      console.log(response.data);
 
       setMensagemKitnet("Kitnet cadastrada com sucesso.");
 
@@ -195,7 +195,13 @@ export default function Dashboard() {
       }, 700);
     } catch (error) {
       console.error("Erro ao cadastrar kitnet:", error);
-      setErroKitnet(error.message || "Não foi possível cadastrar a kitnet.");
+
+      setErroKitnet(
+        error.response?.data?.erro ||
+          error.response?.data?.message ||
+          error.message ||
+          "Não foi possível cadastrar a kitnet.",
+      );
     } finally {
       setSalvandoKitnet(false);
     }
@@ -241,14 +247,24 @@ export default function Dashboard() {
             </p>
           </div>
 
-          <button
-            className="refresh-button"
-            onClick={carregarDados}
-            title="Atualizar dados"
-            aria-label="Atualizar dados"
-          >
-            ↻
-          </button>
+          <div className="dashboard-header-actions">
+            <button
+              className="refresh-button"
+              onClick={carregarDados}
+              title="Atualizar dados"
+              aria-label="Atualizar dados"
+            >
+              ↻
+            </button>
+
+            <button
+              className="logout-button"
+              onClick={handleLogout}
+              title="Sair do sistema"
+            >
+              Sair
+            </button>
+          </div>
         </header>
 
         {/* ERRO */}
@@ -271,8 +287,6 @@ export default function Dashboard() {
             {/* RESUMO */}
             <section className="summary-section">
               <div className="summary-card summary-main">
-                <div className="summary-main-icon">R$</div>
-
                 <div>
                   <span className="summary-label">Aluguéis cadastrados</span>
 
@@ -299,7 +313,7 @@ export default function Dashboard() {
                 </div>
 
                 <div className="summary-card">
-                  <div className="summary-icon blue">✓</div>
+                  <div className="summary-icon yellow">✓</div>
 
                   <strong>{kitnetsOcupadas}</strong>
 
@@ -522,7 +536,7 @@ export default function Dashboard() {
                     step="0.01"
                     value={valorAluguel}
                     onChange={(event) => setValorAluguel(event.target.value)}
-                    placeholder="800,00"
+                    placeholder="500,00"
                     disabled={salvandoKitnet}
                   />
                 </div>

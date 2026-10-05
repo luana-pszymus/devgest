@@ -16,12 +16,6 @@ app.get("/api", (req, res) => {
   res.send("API de Gestão de Kitnets funcionando.");
 });
 
-const consController = require("./controllers/consController");
-
-app.get("/api/inquilinos", consController.listarInquilino);
-app.get("/api/kitnet", consController.listarKitnet);
-app.get("/api/conteudo", consController.listarConten);
-
 //routes
 app.use("/api/consumo", consumoRoutes);
 app.use("/api/inquilino", inquilinoRoutes);

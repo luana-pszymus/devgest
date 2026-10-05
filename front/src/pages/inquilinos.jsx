@@ -23,8 +23,7 @@ function Inquilinos() {
   const [contratos, setContratos] = useState([]);
 
   const [mostrarForm, setMostrarForm] = useState(false);
-  const [mostrarDetalhes, setMostrarDetalhes] =
-    useState(false);
+  const [mostrarDetalhes, setMostrarDetalhes] = useState(false);
 
   const [editando, setEditando] = useState(null);
   const [selecionado, setSelecionado] = useState(null);
@@ -50,47 +49,28 @@ function Inquilinos() {
       setCarregando(true);
       setErro("");
 
-      const [
-        inquilinosRes,
-        resumoRes,
-        kitnetsRes,
-        contratosRes,
-      ] = await Promise.all([
-        api.get("/api/inquilinos"),
-        api.get("/api/resumo/inquilinos"),
-        api.get("/api/kitnet/listar"),
-        api.get("/api/contratos"),
-      ]);
+      const [inquilinosRes, resumoRes, kitnetsRes, contratosRes] =
+        await Promise.all([
+          api.get("/api/inquilino/listar"),
+          api.get("/api/resumo/inquilinos"),
+          api.get("/api/kitnet/listar"),
+          api.get("/api/contratos"),
+        ]);
 
       setInquilinos(
-        Array.isArray(inquilinosRes.data)
-          ? inquilinosRes.data
-          : [],
+        Array.isArray(inquilinosRes.data) ? inquilinosRes.data : [],
       );
 
-      setResumo(
-        Array.isArray(resumoRes.data)
-          ? resumoRes.data
-          : [],
-      );
+      setResumo(Array.isArray(resumoRes.data) ? resumoRes.data : []);
 
-      setKitnets(
-        Array.isArray(kitnetsRes.data)
-          ? kitnetsRes.data
-          : [],
-      );
+      setKitnets(Array.isArray(kitnetsRes.data) ? kitnetsRes.data : []);
 
-      setContratos(
-        Array.isArray(contratosRes.data)
-          ? contratosRes.data
-          : [],
-      );
+      setContratos(Array.isArray(contratosRes.data) ? contratosRes.data : []);
     } catch (error) {
       console.error(error);
 
       setErro(
-        error.response?.data?.erro ||
-          "Não foi possível carregar os dados.",
+        error.response?.data?.erro || "Não foi possível carregar os dados.",
       );
     } finally {
       setCarregando(false);
@@ -101,8 +81,7 @@ function Inquilinos() {
   function kitnetEstaOcupada(id) {
     return contratos.some(
       (contrato) =>
-        Number(contrato.kitnet_id) === Number(id) &&
-        !contrato.data_fim,
+        Number(contrato.kitnet_id) === Number(id) && !contrato.data_fim,
     );
   }
 
@@ -110,23 +89,15 @@ function Inquilinos() {
   // Na edição, mantém também a kitnet atual do inquilino.
   function kitnetsDisponiveis() {
     const contratoAtual = editando
-      ? resumo.find(
-          (item) =>
-            Number(item.inquilino_id) ===
-            Number(editando.id),
-        )
+      ? resumo.find((item) => Number(item.inquilino_id) === Number(editando.id))
       : null;
 
-    const kitnetAtualId =
-      contratoAtual?.kitnet_id;
+    const kitnetAtualId = contratoAtual?.kitnet_id;
 
     return kitnets.filter((kitnet) => {
-      const ocupada =
-        kitnetEstaOcupada(kitnet.id);
+      const ocupada = kitnetEstaOcupada(kitnet.id);
 
-      const eAtual =
-        Number(kitnet.id) ===
-        Number(kitnetAtualId);
+      const eAtual = Number(kitnet.id) === Number(kitnetAtualId);
 
       return !ocupada || eAtual;
     });
@@ -158,11 +129,7 @@ function Inquilinos() {
     setTelefone(inquilino.telefone || "");
     setEmail(inquilino.email || "");
 
-    setKitnetId(
-      dados?.kitnet_id
-        ? String(dados.kitnet_id)
-        : "",
-    );
+    setKitnetId(dados?.kitnet_id ? String(dados.kitnet_id) : "");
 
     setErro("");
     setMensagem("");
@@ -210,72 +177,49 @@ function Inquilinos() {
 
       if (editando) {
         // Primeiro atualiza os dados pessoais.
-        await api.put(
-          `/api/inquilino/${editando.id}`,
-          dadosInquilino,
-        );
+        await api.put(`/api/inquilino/listar/${editando.id}`, dadosInquilino);
 
-        const dadosContrato =
-          pegarResumo(editando.id);
+        const dadosContrato = pegarResumo(editando.id);
 
         if (dadosContrato?.contrato_id) {
           // Atualiza a kitnet do contrato.
-          await api.put(
-            `/api/contratos/${dadosContrato.contrato_id}`,
-            {
-              inquilinoId: editando.id,
-              kitnetId: Number(kitnetId),
-              dataInicio:
-                dadosContrato.data_inicio,
-              dataFim:
-                dadosContrato.data_fim || null,
-            },
-          );
+          await api.put(`/api/contratos/${dadosContrato.contrato_id}`, {
+            inquilinoId: editando.id,
+            kitnetId: Number(kitnetId),
+            dataInicio: dadosContrato.data_inicio,
+            dataFim: dadosContrato.data_fim || null,
+          });
         } else {
           // Caso o inquilino não tenha contrato,
           // cria um novo contrato.
-          await api.post(
-            "/api/contratos/",
-            {
-              inquilinoId: editando.id,
-              kitnetId: Number(kitnetId),
-              dataInicio:
-                new Date().toISOString(),
-              dataFim: null,
-            },
-          );
+          await api.post("/api/contratos/", {
+            inquilinoId: editando.id,
+            kitnetId: Number(kitnetId),
+            dataInicio: new Date().toISOString(),
+            dataFim: null,
+          });
         }
 
-        setMensagem(
-          "Inquilino atualizado com sucesso!",
-        );
+        setMensagem("Inquilino atualizado com sucesso!");
       } else {
         // Primeiro cria o inquilino.
-        const resposta =
-          await api.post(
-            "/api/inquilino/",
-            dadosInquilino,
-          );
+        const resposta = await api.post(
+          "/api/inquilino/listar",
+          dadosInquilino,
+        );
 
-        const novoInquilino =
-          resposta.data;
+        const novoInquilino = resposta.data;
 
         // Depois cria o contrato ligando
         // o novo inquilino à kitnet.
-        await api.post(
-          "/api/contratos/",
-          {
-            inquilinoId: novoInquilino.id,
-            kitnetId: Number(kitnetId),
-            dataInicio:
-              new Date().toISOString(),
-            dataFim: null,
-          },
-        );
+        await api.post("/api/contratos/", {
+          inquilinoId: novoInquilino.id,
+          kitnetId: Number(kitnetId),
+          dataInicio: new Date().toISOString(),
+          dataFim: null,
+        });
 
-        setMensagem(
-          "Inquilino cadastrado com sucesso!",
-        );
+        setMensagem("Inquilino cadastrado com sucesso!");
       }
 
       fecharForm();
@@ -284,8 +228,7 @@ function Inquilinos() {
       console.error(error);
 
       setErro(
-        error.response?.data?.erro ||
-          "Não foi possível salvar o inquilino.",
+        error.response?.data?.erro || "Não foi possível salvar o inquilino.",
       );
     } finally {
       setSalvando(false);
@@ -302,9 +245,7 @@ function Inquilinos() {
 
   // Exclui um inquilino.
   async function excluirInquilino(inquilino) {
-    const confirmou = window.confirm(
-      `Excluir ${inquilino.nome}?`,
-    );
+    const confirmou = window.confirm(`Excluir ${inquilino.nome}?`);
 
     if (!confirmou) return;
 
@@ -312,13 +253,9 @@ function Inquilinos() {
       setErro("");
       setMensagem("");
 
-      await api.delete(
-        `/api/inquilino/${inquilino.id}`,
-      );
+      await api.delete(`/api/inquilino/${inquilino.id}`);
 
-      setMensagem(
-        "Inquilino excluído com sucesso.",
-      );
+      setMensagem("Inquilino excluído com sucesso.");
 
       setMostrarDetalhes(false);
       setSelecionado(null);
@@ -328,8 +265,7 @@ function Inquilinos() {
       console.error(error);
 
       setErro(
-        error.response?.data?.erro ||
-          "Não foi possível excluir o inquilino.",
+        error.response?.data?.erro || "Não foi possível excluir o inquilino.",
       );
     }
   }
@@ -337,15 +273,11 @@ function Inquilinos() {
   // Encerra o contrato atual.
   async function encerrarContrato(dados) {
     if (!dados?.contrato_id) {
-      setErro(
-        "Esse inquilino não possui contrato.",
-      );
+      setErro("Esse inquilino não possui contrato.");
       return;
     }
 
-    const confirmou = window.confirm(
-      `Encerrar o contrato de ${dados.nome}?`,
-    );
+    const confirmou = window.confirm(`Encerrar o contrato de ${dados.nome}?`);
 
     if (!confirmou) return;
 
@@ -353,104 +285,65 @@ function Inquilinos() {
       setErro("");
       setMensagem("");
 
-      await api.put(
-        `/api/contratos/${dados.contrato_id}`,
-        {
-          inquilinoId: dados.inquilino_id,
-          kitnetId: dados.kitnet_id,
-          dataInicio: dados.data_inicio,
-          dataFim:
-            new Date().toISOString(),
-        },
-      );
+      await api.put(`/api/contratos/${dados.contrato_id}`, {
+        inquilinoId: dados.inquilino_id,
+        kitnetId: dados.kitnet_id,
+        dataInicio: dados.data_inicio,
+        dataFim: new Date().toISOString(),
+      });
 
-      setMensagem(
-        "Contrato encerrado com sucesso.",
-      );
+      setMensagem("Contrato encerrado com sucesso.");
 
       await carregarDados();
     } catch (error) {
       console.error(error);
 
       setErro(
-        error.response?.data?.erro ||
-          "Não foi possível encerrar o contrato.",
+        error.response?.data?.erro || "Não foi possível encerrar o contrato.",
       );
     }
   }
 
   // Pega as informações extras do inquilino.
   function pegarResumo(id) {
-    return resumo.find(
-      (item) =>
-        Number(item.inquilino_id) ===
-        Number(id),
-    );
+    return resumo.find((item) => Number(item.inquilino_id) === Number(id));
   }
 
   return (
     <div className="app-container">
-
       <main className="main-content">
-
         {/* Cabeçalho */}
         <header className="tenant-header">
-
           <div>
-            <span className="tenant-eyebrow">
-              GESTÃO
-            </span>
+            <span className="tenant-eyebrow">GESTÃO</span>
 
-            <h1 className="page-title">
-              Inquilinos
-            </h1>
+            <h1 className="page-title">Inquilinos</h1>
 
             <p className="page-subtitle">
               Pessoas cadastradas e seus contratos.
             </p>
           </div>
 
-          <button
-            className="tenant-add"
-            onClick={novoInquilino}
-            type="button"
-          >
+          <button className="tenant-add" onClick={novoInquilino} type="button">
             +
           </button>
-
         </header>
 
         {/* Mensagens */}
-        {erro && (
-          <div className="tenant-message error">
-            {erro}
-          </div>
-        )}
+        {erro && <div className="tenant-message error">{erro}</div>}
 
-        {mensagem && (
-          <div className="tenant-message success">
-            ✓ {mensagem}
-          </div>
-        )}
+        {mensagem && <div className="tenant-message success">✓ {mensagem}</div>}
 
         {/* Formulário */}
         {mostrarForm && (
           <section className="tenant-form card">
-
             <div className="form-top">
-
               <div>
                 <span className="form-label-small">
-                  {editando
-                    ? "EDITAR"
-                    : "NOVO CADASTRO"}
+                  {editando ? "EDITAR" : "NOVO CADASTRO"}
                 </span>
 
-                <h2>
-                  {editando
-                    ? "Editar inquilino"
-                    : "Novo inquilino"}
-                </h2>
+                <h2>{editando ? "Editar inquilino" : "Novo inquilino"}</h2>
               </div>
 
               <button
@@ -460,104 +353,67 @@ function Inquilinos() {
               >
                 ×
               </button>
-
             </div>
 
             <form onSubmit={salvarInquilino}>
-
               <div className="form-group">
-
-                <label className="form-label">
-                  Nome
-                </label>
+                <label className="form-label">Nome</label>
 
                 <input
                   className="form-input"
                   type="text"
                   value={nome}
-                  onChange={(e) =>
-                    setNome(e.target.value)
-                  }
+                  onChange={(e) => setNome(e.target.value)}
                   placeholder="Nome completo"
                   required
                 />
-
               </div>
 
               <div className="form-group">
-
-                <label className="form-label">
-                  Telefone
-                </label>
+                <label className="form-label">Telefone</label>
 
                 <input
                   className="form-input"
                   type="tel"
                   value={telefone}
-                  onChange={(e) =>
-                    setTelefone(e.target.value)
-                  }
+                  onChange={(e) => setTelefone(e.target.value)}
                   placeholder="(42) 99999-9999"
                 />
-
               </div>
 
               <div className="form-group">
-
-                <label className="form-label">
-                  E-mail
-                </label>
+                <label className="form-label">E-mail</label>
 
                 <input
                   className="form-input"
                   type="email"
                   value={email}
-                  onChange={(e) =>
-                    setEmail(e.target.value)
-                  }
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="email@exemplo.com"
                 />
-
               </div>
 
               <div className="form-group">
-
-                <label className="form-label">
-                  Kitnet
-                </label>
+                <label className="form-label">Kitnet</label>
 
                 <select
                   className="form-input"
                   value={kitnetId}
-                  onChange={(e) =>
-                    setKitnetId(e.target.value)
-                  }
+                  onChange={(e) => setKitnetId(e.target.value)}
                   required
                 >
+                  <option value="">Selecione uma kitnet</option>
 
-                  <option value="">
-                    Selecione uma kitnet
-                  </option>
-
-                  {kitnetsDisponiveis().map(
-                    (kitnet) => (
-                      <option
-                        key={kitnet.id}
-                        value={kitnet.id}
-                      >
-                        Kitnet {kitnet.numero}
-                        {" — "}
-                        {formatarMoeda(
-                          kitnet.valor_aluguel,
-                        )}
-                      </option>
-                    ),
-                  )}
-
+                  {kitnetsDisponiveis().map((kitnet) => (
+                    <option key={kitnet.id} value={kitnet.id}>
+                      Kitnet {kitnet.numero}
+                      {" — "}
+                      {formatarMoeda(kitnet.valor_aluguel)}
+                    </option>
+                  ))}
                 </select>
 
-                {kitnetsDisponiveis().length ===
-                  0 && (
+                {kitnetsDisponiveis().length === 0 && (
                   <span
                     style={{
                       display: "block",
@@ -569,17 +425,12 @@ function Inquilinos() {
                     Não há kitnets disponíveis.
                   </span>
                 )}
-
               </div>
 
               <button
                 className="btn btn-primary"
                 type="submit"
-                disabled={
-                  salvando ||
-                  kitnetsDisponiveis()
-                    .length === 0
-                }
+                disabled={salvando || kitnetsDisponiveis().length === 0}
               >
                 {salvando
                   ? "Salvando..."
@@ -587,85 +438,48 @@ function Inquilinos() {
                     ? "Salvar alterações"
                     : "Cadastrar inquilino"}
               </button>
-
             </form>
-
           </section>
         )}
 
         {/* Lista */}
         {carregando ? (
-
           <div className="tenant-empty card">
-            <span>
-              Carregando inquilinos...
-            </span>
+            <span>Carregando inquilinos...</span>
           </div>
-
         ) : inquilinos.length === 0 ? (
-
           <div className="tenant-empty card">
+            <div className="empty-icon">👤</div>
 
-            <div className="empty-icon">
-              👤
-            </div>
+            <strong>Nenhum inquilino cadastrado</strong>
 
-            <strong>
-              Nenhum inquilino cadastrado
-            </strong>
-
-            <span>
-              Use o botão + para cadastrar o primeiro.
-            </span>
-
+            <span>Use o botão + para cadastrar o primeiro.</span>
           </div>
-
         ) : (
-
           <>
-
             <div className="tenant-count">
-
-              <strong>
-                {inquilinos.length}
-              </strong>
+              <strong>{inquilinos.length}</strong>
 
               <span>
                 {inquilinos.length === 1
                   ? " inquilino cadastrado"
                   : " inquilinos cadastrados"}
               </span>
-
             </div>
 
             <section className="tenant-list">
-
               {inquilinos.map((inquilino) => {
+                const dados = pegarResumo(inquilino.id);
 
-                const dados = pegarResumo(
-                  inquilino.id,
-                );
-
-                const ativo =
-                  dados?.data_fim == null;
+                const ativo = dados?.data_fim == null;
 
                 return (
-                  <article
-                    className="tenant-card card"
-                    key={inquilino.id}
-                  >
-
+                  <article className="tenant-card card" key={inquilino.id}>
                     <div className="tenant-card-top">
-
-                      <div className="tenant-avatar">
-                        👤
-                      </div>
+                      <div className="tenant-avatar">👤</div>
 
                       <div className="tenant-name">
-
-                        <h2>
-                          {inquilino.nome}
-                        </h2>
+                        <h2>{inquilino.nome}</h2>
 
                         <span
                           className={
@@ -674,99 +488,60 @@ function Inquilinos() {
                               : "status status-ended"
                           }
                         >
-                          {ativo
-                            ? "Contrato ativo"
-                            : "Contrato encerrado"}
+                          {ativo ? "Contrato ativo" : "Contrato encerrado"}
                         </span>
-
                       </div>
-
                     </div>
 
                     <div className="tenant-info">
-
                       {dados?.kitnet_numero && (
                         <div className="info-line">
-
                           <span>🏠</span>
 
-                          <strong>
-                            Kitnet{" "}
-                            {dados.kitnet_numero}
-                          </strong>
-
+                          <strong>Kitnet {dados.kitnet_numero}</strong>
                         </div>
                       )}
 
                       {inquilino.telefone && (
                         <div className="info-line">
-
                           <span>📞</span>
 
-                          <span>
-                            {inquilino.telefone}
-                          </span>
-
+                          <span>{inquilino.telefone}</span>
                         </div>
                       )}
 
                       {inquilino.email && (
                         <div className="info-line">
-
                           <span>✉️</span>
 
-                          <span>
-                            {inquilino.email}
-                          </span>
-
+                          <span>{inquilino.email}</span>
                         </div>
                       )}
-
                     </div>
 
                     {dados?.consumo && (
                       <div className="last-consumption">
-
                         <div>
-                          <span>
-                            Último consumo
-                          </span>
+                          <span>Último consumo</span>
 
-                          <strong>
-                            {
-                              dados.consumo
-                                .consumo_kwh
-                            }{" "}
-                            kWh
-                          </strong>
+                          <strong>{dados.consumo.consumo_kwh} kWh</strong>
                         </div>
 
                         <div>
-                          <span>
-                            Energia
-                          </span>
+                          <span>Energia</span>
 
                           <strong>
-                            {formatarMoeda(
-                              dados.consumo
-                                .valor_energia,
-                            )}
+                            {formatarMoeda(dados.consumo.valor_energia)}
                           </strong>
                         </div>
-
                       </div>
                     )}
 
                     <div className="tenant-actions">
-
                       <button
                         className="action-button primary"
                         type="button"
-                        onClick={() =>
-                          abrirDetalhes(
-                            inquilino,
-                          )
-                        }
+                        onClick={() => abrirDetalhes(inquilino)}
                       >
                         Ver detalhes
                       </button>
@@ -774,251 +549,143 @@ function Inquilinos() {
                       <button
                         className="action-button"
                         type="button"
-                        onClick={() =>
-                          editarInquilino(
-                            inquilino,
-                          )
-                        }
+                        onClick={() => editarInquilino(inquilino)}
                       >
                         Editar
                       </button>
-
                     </div>
-
                   </article>
                 );
               })}
-
             </section>
-
           </>
         )}
-
       </main>
 
       {/* Detalhes */}
-      {mostrarDetalhes &&
-        selecionado && (
-          <div className="modal-background">
+      {mostrarDetalhes && selecionado && (
+        <div className="modal-background">
+          <section className="tenant-modal">
+            <div className="modal-header">
+              <div className="modal-person">
+                <div className="tenant-avatar large">👤</div>
 
-            <section className="tenant-modal">
+                <div>
+                  <span className="tenant-eyebrow">INQUILINO</span>
 
-              <div className="modal-header">
-
-                <div className="modal-person">
-
-                  <div className="tenant-avatar large">
-                    👤
-                  </div>
-
-                  <div>
-
-                    <span className="tenant-eyebrow">
-                      INQUILINO
-                    </span>
-
-                    <h2>
-                      {selecionado.nome}
-                    </h2>
-
-                  </div>
-
+                  <h2>{selecionado.nome}</h2>
                 </div>
-
-                <button
-                  className="close-button"
-                  type="button"
-                  onClick={() =>
-                    setMostrarDetalhes(false)
-                  }
-                >
-                  ×
-                </button>
-
               </div>
 
-              {(() => {
+              <button
+                className="close-button"
+                type="button"
+                onClick={() => setMostrarDetalhes(false)}
+              >
+                ×
+              </button>
+            </div>
 
-                const dados = pegarResumo(
-                  selecionado.id,
-                );
+            {(() => {
+              const dados = pegarResumo(selecionado.id);
 
-                const ativo =
-                  dados?.data_fim == null;
+              const ativo = dados?.data_fim == null;
 
-                return (
-                  <>
-                    <div className="detail-box">
+              return (
+                <>
+                  <div className="detail-box">
+                    <h3>Dados</h3>
 
-                      <h3>
-                        Dados
-                      </h3>
+                    <div className="detail-line">
+                      <span>Telefone</span>
 
-                      <div className="detail-line">
-
-                        <span>
-                          Telefone
-                        </span>
-
-                        <strong>
-                          {selecionado.telefone ||
-                            "Não informado"}
-                        </strong>
-
-                      </div>
-
-                      <div className="detail-line">
-
-                        <span>
-                          E-mail
-                        </span>
-
-                        <strong>
-                          {selecionado.email ||
-                            "Não informado"}
-                        </strong>
-
-                      </div>
-
+                      <strong>{selecionado.telefone || "Não informado"}</strong>
                     </div>
 
-                    <div className="detail-box">
+                    <div className="detail-line">
+                      <span>E-mail</span>
 
-                      <h3>
-                        Contrato
-                      </h3>
-
-                      {dados ? (
-                        <>
-
-                          <div className="detail-line">
-
-                            <span>
-                              Kitnet
-                            </span>
-
-                            <strong>
-                              Kitnet{" "}
-                              {
-                                dados.kitnet_numero
-                              }
-                            </strong>
-
-                          </div>
-
-                          <div className="detail-line">
-
-                            <span>
-                              Início
-                            </span>
-
-                            <strong>
-                              {formatarData(
-                                dados.data_inicio,
-                              )}
-                            </strong>
-
-                          </div>
-
-                          <div className="detail-line">
-
-                            <span>
-                              Fim
-                            </span>
-
-                            <strong>
-                              {dados.data_fim
-                                ? formatarData(
-                                    dados.data_fim,
-                                  )
-                                : "Contrato ativo"}
-                            </strong>
-
-                          </div>
-
-                          {dados.consumo && (
-                            <div className="detail-line">
-
-                              <span>
-                                Último consumo
-                              </span>
-
-                              <strong>
-                                {
-                                  dados.consumo
-                                    .consumo_kwh
-                                }{" "}
-                                kWh
-                              </strong>
-
-                            </div>
-                          )}
-
-                        </>
-                      ) : (
-
-                        <p className="detail-empty">
-                          Nenhum contrato encontrado.
-                        </p>
-
-                      )}
-
+                      <strong>{selecionado.email || "Não informado"}</strong>
                     </div>
+                  </div>
 
-                    <div className="modal-actions">
+                  <div className="detail-box">
+                    <h3>Contrato</h3>
 
+                    {dados ? (
+                      <>
+                        <div className="detail-line">
+                          <span>Kitnet</span>
+
+                          <strong>Kitnet {dados.kitnet_numero}</strong>
+                        </div>
+
+                        <div className="detail-line">
+                          <span>Início</span>
+
+                          <strong>{formatarData(dados.data_inicio)}</strong>
+                        </div>
+
+                        <div className="detail-line">
+                          <span>Fim</span>
+
+                          <strong>
+                            {dados.data_fim
+                              ? formatarData(dados.data_fim)
+                              : "Contrato ativo"}
+                          </strong>
+                        </div>
+
+                        {dados.consumo && (
+                          <div className="detail-line">
+                            <span>Último consumo</span>
+
+                            <strong>{dados.consumo.consumo_kwh} kWh</strong>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <p className="detail-empty">
+                        Nenhum contrato encontrado.
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="modal-actions">
+                    <button
+                      className="btn btn-secondary"
+                      type="button"
+                      onClick={() => editarInquilino(selecionado)}
+                    >
+                      ✏️ Editar dados
+                    </button>
+
+                    {dados && ativo && (
                       <button
-                        className="btn btn-secondary"
+                        className="btn btn-warning"
                         type="button"
-                        onClick={() =>
-                          editarInquilino(
-                            selecionado,
-                          )
-                        }
+                        onClick={() => encerrarContrato(dados)}
                       >
-                        ✏️ Editar dados
+                        🚪 Encerrar contrato
                       </button>
+                    )}
 
-                      {dados && ativo && (
-                        <button
-                          className="btn btn-warning"
-                          type="button"
-                          onClick={() =>
-                            encerrarContrato(
-                              dados,
-                            )
-                          }
-                        >
-                          🚪 Encerrar contrato
-                        </button>
-                      )}
-
-                      <button
-                        className="btn btn-danger"
-                        type="button"
-                        onClick={() =>
-                          excluirInquilino(
-                            selecionado,
-                          )
-                        }
-                      >
-                        🗑️ Excluir inquilino
-                      </button>
-
-                    </div>
-
-                  </>
-                );
-
-              })()}
-
-            </section>
-
-          </div>
-        )}
+                    <button
+                      className="btn btn-danger"
+                      type="button"
+                      onClick={() => excluirInquilino(selecionado)}
+                    >
+                      🗑️ Excluir inquilino
+                    </button>
+                  </div>
+                </>
+              );
+            })()}
+          </section>
+        </div>
+      )}
 
       <Navbar />
-
     </div>
   );
 }

@@ -26,10 +26,7 @@ function formatarMoeda(valor) {
 }
 
 function nomeDoMes(numero) {
-  return (
-    MESES.find((mes) => mes.valor === Number(numero))?.nome ||
-    numero
-  );
+  return MESES.find((mes) => mes.valor === Number(numero))?.nome || numero;
 }
 
 function RegistrarConsumo() {
@@ -42,39 +39,28 @@ function RegistrarConsumo() {
   const [contratoId, setContratoId] = useState("");
   const [filtroInquilino, setFiltroInquilino] = useState("");
 
-  const [mes, setMes] = useState(
-    String(dataAtual.getMonth() + 1)
-  );
+  const [mes, setMes] = useState(String(dataAtual.getMonth() + 1));
 
-  const [ano, setAno] = useState(
-    dataAtual.getFullYear()
-  );
+  const [ano, setAno] = useState(dataAtual.getFullYear());
 
   const [leituraAtual, setLeituraAtual] = useState("");
   const [precoKwh, setPrecoKwh] = useState("0.92");
 
-  const [leituraAnterior, setLeituraAnterior] =
-    useState(null);
+  const [leituraAnterior, setLeituraAnterior] = useState(null);
 
   const [foto, setFoto] = useState(null);
 
-  const [carregando, setCarregando] =
-    useState(true);
+  const [carregando, setCarregando] = useState(true);
 
-  const [salvando, setSalvando] =
-    useState(false);
+  const [salvando, setSalvando] = useState(false);
 
-  const [mensagem, setMensagem] =
-    useState("");
+  const [mensagem, setMensagem] = useState("");
 
-  const [erro, setErro] =
-    useState("");
+  const [erro, setErro] = useState("");
 
-  const [apagando, setApagando] =
-    useState(null);
+  const [apagando, setApagando] = useState(null);
 
-  const [confirmarExclusao, setConfirmarExclusao] =
-    useState(null);
+  const [confirmarExclusao, setConfirmarExclusao] = useState(null);
 
   useEffect(() => {
     carregarDados();
@@ -86,42 +72,28 @@ function RegistrarConsumo() {
       setCarregando(true);
       setErro("");
 
-      const [
-        contratosResponse,
-        inquilinosResponse,
-        consumosResponse,
-      ] = await Promise.all([
-        api.get("/api/contratos"),
-        api.get("/api/inquilinos"),
-        api.get("/api/consumo/listar"),
-      ]);
+      const [contratosResponse, inquilinosResponse, consumosResponse] =
+        await Promise.all([
+          api.get("/api/contratos"),
+          api.get("/api/inquilino/listar"),
+          api.get("/api/consumo/listar"),
+        ]);
 
       setContratos(
-        Array.isArray(contratosResponse.data)
-          ? contratosResponse.data
-          : []
+        Array.isArray(contratosResponse.data) ? contratosResponse.data : [],
       );
 
       setInquilinos(
-        Array.isArray(inquilinosResponse.data)
-          ? inquilinosResponse.data
-          : []
+        Array.isArray(inquilinosResponse.data) ? inquilinosResponse.data : [],
       );
 
       setConsumos(
-        Array.isArray(consumosResponse.data)
-          ? consumosResponse.data
-          : []
+        Array.isArray(consumosResponse.data) ? consumosResponse.data : [],
       );
     } catch (error) {
-      console.error(
-        "Erro ao carregar dados:",
-        error
-      );
+      console.error("Erro ao carregar dados:", error);
 
-      setErro(
-        "Não foi possível carregar os dados."
-      );
+      setErro("Não foi possível carregar os dados.");
     } finally {
       setCarregando(false);
     }
@@ -140,32 +112,18 @@ function RegistrarConsumo() {
     }
 
     const registros = consumos
-      .filter(
-        (consumo) =>
-          Number(consumo.contrato_id) ===
-          Number(id)
-      )
+      .filter((consumo) => Number(consumo.contrato_id) === Number(id))
       .sort((a, b) => {
-        const dataA =
-          Number(a.ano) * 100 +
-          Number(a.mes);
+        const dataA = Number(a.ano) * 100 + Number(a.mes);
 
-        const dataB =
-          Number(b.ano) * 100 +
-          Number(b.mes);
+        const dataB = Number(b.ano) * 100 + Number(b.mes);
 
         return dataB - dataA;
       });
 
     const ultimoConsumo = registros[0];
 
-    setLeituraAnterior(
-      ultimoConsumo
-        ? Number(
-            ultimoConsumo.leitura_atual
-          )
-        : 0
-    );
+    setLeituraAnterior(ultimoConsumo ? Number(ultimoConsumo.leitura_atual) : 0);
   }
 
   // Registra uma nova leitura no backend.
@@ -182,13 +140,8 @@ function RegistrarConsumo() {
       return;
     }
 
-    if (
-      Number(leituraAtual) <
-      Number(leituraAnterior || 0)
-    ) {
-      setErro(
-        "A leitura atual não pode ser menor que a leitura anterior."
-      );
+    if (Number(leituraAtual) < Number(leituraAnterior || 0)) {
+      setErro("A leitura atual não pode ser menor que a leitura anterior.");
 
       return;
     }
@@ -198,39 +151,27 @@ function RegistrarConsumo() {
       setMensagem("");
       setErro("");
 
-      const response = await api.post(
-        "/api/consumo/registrar",
-        {
-          contrato_id: Number(contratoId),
-          mes: Number(mes),
-          ano: Number(ano),
-          leitura_atual: Number(leituraAtual),
-          preco_kwh: Number(precoKwh),
-        }
-      );
+      const response = await api.post("/api/consumo/registrar", {
+        contrato_id: Number(contratoId),
+        mes: Number(mes),
+        ano: Number(ano),
+        leitura_atual: Number(leituraAtual),
+        preco_kwh: Number(precoKwh),
+      });
 
       await carregarDados();
 
-      setMensagem(
-        response.data?.mensagem ||
-          "Consumo registrado com sucesso!"
-      );
+      setMensagem(response.data?.mensagem || "Consumo registrado com sucesso!");
 
-      setLeituraAnterior(
-        Number(leituraAtual)
-      );
+      setLeituraAnterior(Number(leituraAtual));
 
       setLeituraAtual("");
       setFoto(null);
     } catch (error) {
-      console.error(
-        "Erro ao registrar consumo:",
-        error
-      );
+      console.error("Erro ao registrar consumo:", error);
 
       setErro(
-        error.response?.data?.erro ||
-          "Não foi possível registrar o consumo."
+        error.response?.data?.erro || "Não foi possível registrar o consumo.",
       );
     } finally {
       setSalvando(false);
@@ -260,30 +201,17 @@ function RegistrarConsumo() {
       setErro("");
       setMensagem("");
 
-      await api.delete(
-        `/api/consumo/${id}`
-      );
+      await api.delete(`/api/consumo/${id}`);
 
-      setConsumos((lista) =>
-        lista.filter(
-          (item) => item.id !== id
-        )
-      );
+      setConsumos((lista) => lista.filter((item) => item.id !== id));
 
-      setMensagem(
-        "Registro excluído com sucesso."
-      );
+      setMensagem("Registro excluído com sucesso.");
 
       setConfirmarExclusao(null);
     } catch (error) {
-      console.error(
-        "Erro ao excluir consumo:",
-        error
-      );
+      console.error("Erro ao excluir consumo:", error);
 
-      setErro(
-        "Não foi possível excluir o registro."
-      );
+      setErro("Não foi possível excluir o registro.");
 
       setConfirmarExclusao(null);
     } finally {
@@ -293,469 +221,272 @@ function RegistrarConsumo() {
 
   // Abre a câmera do celular para fotografar o medidor.
   function tirarFoto(e) {
-    const arquivo =
-      e.target.files?.[0];
+    const arquivo = e.target.files?.[0];
 
     if (!arquivo) return;
 
-    const url =
-      URL.createObjectURL(arquivo);
+    const url = URL.createObjectURL(arquivo);
 
     setFoto(url);
   }
 
-  const contratoSelecionado =
-    contratos.find(
-      (contrato) =>
-        Number(contrato.id) ===
-        Number(contratoId)
-    );
+  const contratoSelecionado = contratos.find(
+    (contrato) => Number(contrato.id) === Number(contratoId),
+  );
 
-  const inquilinoSelecionado =
-    inquilinos.find(
-      (inquilino) =>
-        Number(inquilino.id) ===
-        Number(
-          contratoSelecionado?.inquilino_id
-        )
-    );
+  const inquilinoSelecionado = inquilinos.find(
+    (inquilino) =>
+      Number(inquilino.id) === Number(contratoSelecionado?.inquilino_id),
+  );
 
   // Filtra o histórico pelo inquilino escolhido.
   const historico = useMemo(() => {
     let lista = [...consumos];
 
     if (filtroInquilino) {
-      const contratosDoInquilino =
-        contratos
-          .filter(
-            (contrato) =>
-              Number(
-                contrato.inquilino_id
-              ) ===
-              Number(filtroInquilino)
-          )
-          .map((contrato) =>
-            Number(contrato.id)
-          );
+      const contratosDoInquilino = contratos
+        .filter(
+          (contrato) =>
+            Number(contrato.inquilino_id) === Number(filtroInquilino),
+        )
+        .map((contrato) => Number(contrato.id));
 
-      lista = lista.filter(
-        (consumo) =>
-          contratosDoInquilino.includes(
-            Number(consumo.contrato_id)
-          )
+      lista = lista.filter((consumo) =>
+        contratosDoInquilino.includes(Number(consumo.contrato_id)),
       );
     }
 
     return lista.sort((a, b) => {
-      if (
-        Number(a.ano) !==
-        Number(b.ano)
-      ) {
-        return (
-          Number(b.ano) -
-          Number(a.ano)
-        );
+      if (Number(a.ano) !== Number(b.ano)) {
+        return Number(b.ano) - Number(a.ano);
       }
 
-      return (
-        Number(b.mes) -
-        Number(a.mes)
-      );
+      return Number(b.mes) - Number(a.mes);
     });
-  }, [
-    consumos,
-    contratos,
-    filtroInquilino,
-  ]);
+  }, [consumos, contratos, filtroInquilino]);
 
   // Calcula o consumo com base nas duas leituras.
-  const consumoCalculado =
-    useMemo(() => {
-      if (
-        leituraAtual === "" ||
-        leituraAnterior === null ||
-        Number(leituraAtual) <
-          Number(leituraAnterior)
-      ) {
-        return 0;
-      }
+  const consumoCalculado = useMemo(() => {
+    if (
+      leituraAtual === "" ||
+      leituraAnterior === null ||
+      Number(leituraAtual) < Number(leituraAnterior)
+    ) {
+      return 0;
+    }
 
-      return (
-        Number(leituraAtual) -
-        Number(leituraAnterior)
-      );
-    }, [
-      leituraAtual,
-      leituraAnterior,
-    ]);
+    return Number(leituraAtual) - Number(leituraAnterior);
+  }, [leituraAtual, leituraAnterior]);
 
-  const valorCalculado =
-    consumoCalculado *
-    Number(precoKwh || 0);
+  const valorCalculado = consumoCalculado * Number(precoKwh || 0);
 
-  function nomeDoInquilino(
-    contratoIdDoHistorico
-  ) {
-    const contrato =
-      contratos.find(
-        (item) =>
-          Number(item.id) ===
-          Number(
-            contratoIdDoHistorico
-          )
-      );
-
-    const inquilino =
-      inquilinos.find(
-        (item) =>
-          Number(item.id) ===
-          Number(
-            contrato?.inquilino_id
-          )
-      );
-
-    return (
-      inquilino?.nome ||
-      "Inquilino não identificado"
+  function nomeDoInquilino(contratoIdDoHistorico) {
+    const contrato = contratos.find(
+      (item) => Number(item.id) === Number(contratoIdDoHistorico),
     );
+
+    const inquilino = inquilinos.find(
+      (item) => Number(item.id) === Number(contrato?.inquilino_id),
+    );
+
+    return inquilino?.nome || "Inquilino não identificado";
   }
 
-  function numeroDaKitnet(
-    contratoIdDoHistorico
-  ) {
-    const contrato =
-      contratos.find(
-        (item) =>
-          Number(item.id) ===
-          Number(
-            contratoIdDoHistorico
-          )
-      );
-
-    return (
-      contrato?.kitnet_id || "-"
+  function numeroDaKitnet(contratoIdDoHistorico) {
+    const contrato = contratos.find(
+      (item) => Number(item.id) === Number(contratoIdDoHistorico),
     );
+
+    return contrato?.kitnet_id || "-";
   }
 
   return (
     <div className="consumo-page">
-
       <main className="consumo-content">
-
         {/* CABEÇALHO */}
         <header className="consumo-header">
-
           <div>
-            <span className="consumo-eyebrow">
-              CONTROLE DE ENERGIA
-            </span>
+            <span className="consumo-eyebrow">CONTROLE DE ENERGIA</span>
 
-            <h1>
-              Energia
-            </h1>
+            <h1>Energia</h1>
 
-            <p>
-              Registre a leitura e acompanhe o histórico.
-            </p>
+            <p>Registre a leitura e acompanhe o histórico.</p>
           </div>
 
-          <div className="energy-header-icon">
-            ⚡
-          </div>
-
+          <div className="energy-header-icon">⚡</div>
         </header>
 
         {carregando ? (
-
           <div className="consumo-loading">
             <div className="loading-circle"></div>
 
-            <p>
-              Carregando dados...
-            </p>
+            <p>Carregando dados...</p>
           </div>
-
         ) : (
-
           <>
-
             {/* MENSAGEM DE ERRO */}
             {erro && (
               <div className="form-message error">
-                <strong>
-                  Ops!
-                </strong>
+                <strong>Ops!</strong>
 
-                <span>
-                  {erro}
-                </span>
+                <span>{erro}</span>
               </div>
             )}
 
             {/* MENSAGEM DE SUCESSO */}
             {mensagem && (
               <div className="form-message success">
-                <strong>
-                  ✓ Tudo certo!
-                </strong>
+                <strong>✓ Tudo certo!</strong>
 
-                <span>
-                  {mensagem}
-                </span>
+                <span>{mensagem}</span>
               </div>
             )}
 
             {/* FOTO DO MEDIDOR */}
             {foto && (
               <div className="photo-card">
-
                 <div>
-                  <strong>
-                    Foto do medidor
-                  </strong>
+                  <strong>Foto do medidor</strong>
 
-                  <span>
-                    Use a foto para conferir a leitura.
-                  </span>
+                  <span>Use a foto para conferir a leitura.</span>
                 </div>
 
-                <img
-                  src={foto}
-                  alt="Foto do medidor"
-                />
-
+                <img src={foto} alt="Foto do medidor" />
               </div>
             )}
 
             {/* FORMULÁRIO */}
-            <form
-              className="consumo-form"
-              onSubmit={registrarConsumo}
-            >
-
+            <form className="consumo-form" onSubmit={registrarConsumo}>
               {/* 01 - IMÓVEL */}
               <section className="form-section">
-
                 <div className="section-title">
-
-                  <span className="section-number">
-                    01
-                  </span>
+                  <span className="section-number">01</span>
 
                   <div>
-                    <strong>
-                      Imóvel
-                    </strong>
+                    <strong>Imóvel</strong>
 
-                    <span>
-                      Escolha a kitnet que será registrada.
-                    </span>
+                    <span>Escolha a kitnet que será registrada.</span>
                   </div>
-
                 </div>
 
-                <label className="field-label">
-                  Kitnet
-                </label>
+                <label className="field-label">Kitnet</label>
 
                 <select
                   className="field-control"
                   value={contratoId}
-                  onChange={(e) =>
-                    selecionarContrato(
-                      e.target.value
-                    )
-                  }
+                  onChange={(e) => selecionarContrato(e.target.value)}
                   required
                 >
-                  <option value="">
-                    Selecione uma kitnet
-                  </option>
+                  <option value="">Selecione uma kitnet</option>
 
-                  {contratos.map(
-                    (contrato) => (
-                      <option
-                        key={contrato.id}
-                        value={contrato.id}
-                      >
-                        Kitnet{" "}
-                        {contrato.kitnet_id}
-                      </option>
-                    )
-                  )}
+                  {contratos.map((contrato) => (
+                    <option key={contrato.id} value={contrato.id}>
+                      Kitnet {contrato.kitnet_id}
+                    </option>
+                  ))}
                 </select>
 
                 {contratoSelecionado && (
                   <div className="energy-tenant-card">
-
-                    <div className="energy-tenant-icon">
-                      👤
-                    </div>
+                    <div className="energy-tenant-icon">👤</div>
 
                     <div>
-                      <span>
-                        Inquilino
-                      </span>
+                      <span>Inquilino</span>
 
                       <strong>
                         {inquilinoSelecionado?.nome ||
                           `Inquilino #${contratoSelecionado.inquilino_id}`}
                       </strong>
                     </div>
-
                   </div>
                 )}
-
               </section>
 
               {/* 02 - PERÍODO */}
               <section className="form-section">
-
                 <div className="section-title">
-
-                  <span className="section-number">
-                    02
-                  </span>
+                  <span className="section-number">02</span>
 
                   <div>
-                    <strong>
-                      Período
-                    </strong>
+                    <strong>Período</strong>
 
-                    <span>
-                      Em qual mês essa leitura foi feita?
-                    </span>
+                    <span>Em qual mês essa leitura foi feita?</span>
                   </div>
-
                 </div>
 
                 <div className="period-grid">
-
                   <div>
-
-                    <label className="field-label">
-                      Mês
-                    </label>
+                    <label className="field-label">Mês</label>
 
                     <select
                       className="field-control"
                       value={mes}
-                      onChange={(e) =>
-                        setMes(
-                          e.target.value
-                        )
-                      }
+                      onChange={(e) => setMes(e.target.value)}
                       required
                     >
-                      {MESES.map(
-                        (item) => (
-                          <option
-                            key={item.valor}
-                            value={item.valor}
-                          >
-                            {item.nome}
-                          </option>
-                        )
-                      )}
+                      {MESES.map((item) => (
+                        <option key={item.valor} value={item.valor}>
+                          {item.nome}
+                        </option>
+                      ))}
                     </select>
-
                   </div>
 
                   <div>
-
-                    <label className="field-label">
-                      Ano
-                    </label>
+                    <label className="field-label">Ano</label>
 
                     <input
                       className="field-control"
                       type="number"
                       value={ano}
-                      onChange={(e) =>
-                        setAno(
-                          e.target.value
-                        )
-                      }
+                      onChange={(e) => setAno(e.target.value)}
                       required
                     />
-
                   </div>
-
                 </div>
-
               </section>
 
               {/* 03 - LEITURA */}
               <section className="form-section energy-reading-section">
-
                 <div className="section-title">
-
-                  <span className="section-number">
-                    03
-                  </span>
+                  <span className="section-number">03</span>
 
                   <div>
-                    <strong>
-                      Leitura do medidor
-                    </strong>
+                    <strong>Leitura do medidor</strong>
 
-                    <span>
-                      Digite o número mostrado no relógio.
-                    </span>
+                    <span>Digite o número mostrado no relógio.</span>
                   </div>
-
                 </div>
 
                 <div className="reading-card">
-
                   <div className="reading-row">
-
-                    <span>
-                      Leitura anterior
-                    </span>
+                    <span>Leitura anterior</span>
 
                     <strong>
                       {leituraAnterior === null
                         ? "—"
                         : `${leituraAnterior} kWh`}
                     </strong>
-
                   </div>
 
                   <div className="reading-divider"></div>
 
-                  <label className="reading-label">
-                    Leitura atual
-                  </label>
+                  <label className="reading-label">Leitura atual</label>
 
                   <div className="reading-input-line">
-
                     <div className="reading-input-wrapper">
-
                       <input
                         className="reading-input"
                         type="number"
-                        min={
-                          leituraAnterior ??
-                          0
-                        }
+                        min={leituraAnterior ?? 0}
                         step="0.01"
-                        value={
-                          leituraAtual
-                        }
-                        onChange={(e) =>
-                          setLeituraAtual(
-                            e.target.value
-                          )
-                        }
+                        value={leituraAtual}
+                        onChange={(e) => setLeituraAtual(e.target.value)}
                         placeholder="0"
                         required
                       />
 
-                      <span>
-                        kWh
-                      </span>
-
+                      <span>kWh</span>
                     </div>
 
                     {/* CÂMERA */}
@@ -763,10 +494,7 @@ function RegistrarConsumo() {
                       className="camera-button"
                       title="Tirar foto do medidor"
                     >
-
-                      <span>
-                        📷
-                      </span>
+                      <span>📷</span>
 
                       <input
                         type="file"
@@ -774,112 +502,63 @@ function RegistrarConsumo() {
                         capture="environment"
                         onChange={tirarFoto}
                       />
-
                     </label>
-
                   </div>
 
                   <span className="camera-hint">
                     Você pode tirar uma foto para conferir o medidor.
                   </span>
-
                 </div>
-
               </section>
 
               {/* 04 - VALOR */}
               <section className="form-section energy-value-section">
-
                 <div className="section-title">
-
-                  <span className="section-number">
-                    04
-                  </span>
+                  <span className="section-number">04</span>
 
                   <div>
-                    <strong>
-                      Valor da energia
-                    </strong>
+                    <strong>Valor da energia</strong>
 
-                    <span>
-                      Confira o valor antes de registrar.
-                    </span>
+                    <span>Confira o valor antes de registrar.</span>
                   </div>
-
                 </div>
 
                 <div className="price-card">
-
                   <div className="price-field">
-
-                    <label className="field-label">
-                      Preço do kWh
-                    </label>
+                    <label className="field-label">Preço do kWh</label>
 
                     <div className="money-input">
-
-                      <span>
-                        R$
-                      </span>
+                      <span>R$</span>
 
                       <input
                         type="number"
                         step="0.01"
                         min="0"
-                        value={
-                          precoKwh
-                        }
-                        onChange={(e) =>
-                          setPrecoKwh(
-                            e.target.value
-                          )
-                        }
+                        value={precoKwh}
+                        onChange={(e) => setPrecoKwh(e.target.value)}
                         required
                       />
 
-                      <span>
-                        / kWh
-                      </span>
-
+                      <span>/ kWh</span>
                     </div>
-
                   </div>
 
                   <div className="calculation">
-
                     <div>
+                      <span>Consumo</span>
 
-                      <span>
-                        Consumo
-                      </span>
-
-                      <strong>
-                        {consumoCalculado.toFixed(
-                          2
-                        )}{" "}
-                        kWh
-                      </strong>
-
+                      <strong>{consumoCalculado.toFixed(2)} kWh</strong>
                     </div>
 
                     <div className="calculation-energy">
-
-                      <span>
-                        Valor da energia
-                      </span>
+                      <span>Valor da energia</span>
 
                       <strong className="calculation-total">
-                        {formatarMoeda(
-                          valorCalculado
-                        )}
+                        {formatarMoeda(valorCalculado)}
                       </strong>
-
                     </div>
-
                   </div>
-
                 </div>
-
               </section>
 
               {/* BOTÃO REGISTRAR */}
@@ -888,232 +567,127 @@ function RegistrarConsumo() {
                 className="submit-button"
                 disabled={salvando}
               >
-
                 {salvando ? (
                   <>
                     <span className="button-spinner"></span>
                     Salvando...
                   </>
                 ) : (
-                  <>
-                    ✓ Registrar leitura
-                  </>
+                  <>✓ Registrar leitura</>
                 )}
-
               </button>
-
             </form>
 
             {/* HISTÓRICO */}
             <section className="history-section">
-
               <div className="history-heading">
-
                 <div>
+                  <span className="consumo-eyebrow">REGISTROS</span>
 
-                  <span className="consumo-eyebrow">
-                    REGISTROS
-                  </span>
-
-                  <h2>
-                    Histórico
-                  </h2>
-
+                  <h2>Histórico</h2>
                 </div>
 
-                <span className="history-count">
-                  {historico.length}
-                </span>
-
+                <span className="history-count">{historico.length}</span>
               </div>
 
               {/* FILTRO */}
               <div className="history-filter">
-
-                <label>
-                  Ver histórico de
-                </label>
+                <label>Ver histórico de</label>
 
                 <select
                   className="field-control"
-                  value={
-                    filtroInquilino
-                  }
-                  onChange={(e) =>
-                    setFiltroInquilino(
-                      e.target.value
-                    )
-                  }
+                  value={filtroInquilino}
+                  onChange={(e) => setFiltroInquilino(e.target.value)}
                 >
+                  <option value="">Todos os inquilinos</option>
 
-                  <option value="">
-                    Todos os inquilinos
-                  </option>
-
-                  {inquilinos.map(
-                    (inquilino) => (
-                      <option
-                        key={inquilino.id}
-                        value={inquilino.id}
-                      >
-                        {inquilino.nome}
-                      </option>
-                    )
-                  )}
-
+                  {inquilinos.map((inquilino) => (
+                    <option key={inquilino.id} value={inquilino.id}>
+                      {inquilino.nome}
+                    </option>
+                  ))}
                 </select>
-
               </div>
 
               {historico.length === 0 ? (
-
                 <div className="empty-history">
+                  <div className="empty-history-icon">⚡</div>
 
-                  <div className="empty-history-icon">
-                    ⚡
-                  </div>
+                  <h3>Nenhum consumo registrado</h3>
 
-                  <h3>
-                    Nenhum consumo registrado
-                  </h3>
-
-                  <p>
-                    Os registros feitos aparecerão aqui.
-                  </p>
-
+                  <p>Os registros feitos aparecerão aqui.</p>
                 </div>
-
               ) : (
-
                 <div className="history-list">
+                  {historico.map((consumo) => (
+                    <article className="history-card" key={consumo.id}>
+                      <div className="history-main">
+                        <div className="history-icon">⚡</div>
 
-                  {historico.map(
-                    (consumo) => (
-                      <article
-                        className="history-card"
-                        key={consumo.id}
-                      >
+                        <div>
+                          <strong>
+                            {nomeDoMes(consumo.mes)} {consumo.ano}
+                          </strong>
 
-                        <div className="history-main">
+                          <span>
+                            {nomeDoInquilino(consumo.contrato_id)} • Kitnet{" "}
+                            {numeroDaKitnet(consumo.contrato_id)}
+                          </span>
 
-                          <div className="history-icon">
-                            ⚡
-                          </div>
+                          <small>{consumo.consumo_kwh} kWh</small>
+                        </div>
+                      </div>
 
-                          <div>
+                      <div className="history-right">
+                        <div className="history-value">
+                          <span>Energia</span>
 
-                            <strong>
-                              {nomeDoMes(
-                                consumo.mes
-                              )}{" "}
-                              {consumo.ano}
-                            </strong>
-
-                            <span>
-                              {nomeDoInquilino(
-                                consumo.contrato_id
-                              )}{" "}
-                              • Kitnet{" "}
-                              {numeroDaKitnet(
-                                consumo.contrato_id
-                              )}
-                            </span>
-
-                            <small>
-                              {consumo.consumo_kwh}{" "}
-                              kWh
-                            </small>
-
-                          </div>
-
+                          <strong>
+                            {formatarMoeda(consumo.valor_energia)}
+                          </strong>
                         </div>
 
-                        <div className="history-right">
-
-                          <div className="history-value">
-
-                            <span>
-                              Energia
-                            </span>
-
-                            <strong>
-                              {formatarMoeda(
-                                consumo.valor_energia
-                              )}
-                            </strong>
-
-                          </div>
-
-                          <button
-                            type="button"
-                            className="delete-button"
-                            onClick={() =>
-                              pedirExclusao(
-                                consumo
-                              )
-                            }
-                            disabled={
-                              apagando ===
-                              consumo.id
-                            }
-                            title="Excluir registro"
-                          >
-                            🗑️
-                          </button>
-
-                        </div>
-
-                      </article>
-                    )
-                  )}
-
+                        <button
+                          type="button"
+                          className="delete-button"
+                          onClick={() => pedirExclusao(consumo)}
+                          disabled={apagando === consumo.id}
+                          title="Excluir registro"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                    </article>
+                  ))}
                 </div>
-
               )}
-
             </section>
-
           </>
         )}
-
       </main>
 
       {/* CONFIRMAÇÃO DE EXCLUSÃO */}
       {confirmarExclusao && (
         <div className="energy-confirm-background">
-
           <section className="energy-confirm-modal">
+            <div className="energy-confirm-icon">🗑️</div>
 
-            <div className="energy-confirm-icon">
-              🗑️
-            </div>
-
-            <h2>
-              Excluir registro?
-            </h2>
+            <h2>Excluir registro?</h2>
 
             <p>
-              O registro de{" "}
-              {nomeDoMes(
-                confirmarExclusao.mes
-              )}{" "}
+              O registro de {nomeDoMes(confirmarExclusao.mes)}{" "}
               {confirmarExclusao.ano} será removido do histórico.
             </p>
 
             <div className="energy-confirm-actions">
-
               {/* AÇÃO PRINCIPAL À ESQUERDA */}
               <button
                 type="button"
                 className="energy-action-button danger"
                 onClick={apagarConsumo}
-                disabled={
-                  apagando !== null
-                }
+                disabled={apagando !== null}
               >
-                {apagando !== null
-                  ? "Excluindo..."
-                  : "Excluir"}
+                {apagando !== null ? "Excluindo..." : "Excluir"}
               </button>
 
               {/* CANCELAR SEMPRE À DIREITA */}
@@ -1121,22 +695,16 @@ function RegistrarConsumo() {
                 type="button"
                 className="energy-action-button cancel"
                 onClick={fecharConfirmacao}
-                disabled={
-                  apagando !== null
-                }
+                disabled={apagando !== null}
               >
                 Cancelar
               </button>
-
             </div>
-
           </section>
-
         </div>
       )}
 
       <Navbar />
-
     </div>
   );
 }

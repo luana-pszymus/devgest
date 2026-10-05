@@ -3,6 +3,9 @@ const express = require("express");
 const router = express.Router();
 
 const contratoController = require("../controllers/contratoController");
+const autenticar = require("../middleware/authMiddleware");
+
+router.use(autenticar);
 
 router.get("/", contratoController.listarContratos);
 router.get("/:id", contratoController.listarContratoId);
