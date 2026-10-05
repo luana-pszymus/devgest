@@ -6,10 +6,10 @@ const Inquilino = require("../models/inquilinoModel");
 // LISTAR TODOS
 exports.listarKitnet = async (req, res) => {
   try {
-    const Kitnet = await Kitnet.findAll({
+    const kitnets = await Kitnet.findAll({
       order: [["numero", "ASC"]],
     });
-    res.json(Kitnet);
+    res.json(kitnets);
   } catch (err) {
     console.error(err);
     res.status(500).send("Erro ao buscar kitnet");
@@ -23,7 +23,7 @@ exports.listarKitnetId = async (req, res) => {
 
     const kitnet = await Kitnet.findByPk(id);
 
-    if (!Kitnet) {
+    if (!kitnet) {
       return res.status(404).json({
         erro: "Kitnet não encontrado.",
       });

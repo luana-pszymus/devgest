@@ -11,7 +11,7 @@ function Navbar() {
 
   const items = [
     {
-      path: "/",
+      path: "/dashboard",
       label: "Início",
       icon: homeIcon,
     },
@@ -44,11 +44,7 @@ function Navbar() {
             className={`nav-item ${active ? "active" : ""}`}
           >
             <span className="nav-icon-wrapper">
-              <img
-                src={item.icon}
-                alt=""
-                className="nav-icon"
-              />
+              <img src={item.icon} alt="" className="nav-icon" />
             </span>
 
             <span className="nav-label">{item.label}</span>

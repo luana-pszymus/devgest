@@ -1,3 +1,4 @@
+const jwt = require("jsonwebtoken");
 const Usuario = require("../models/loginModel");
 const nodemailer = require("nodemailer");
 
@@ -42,9 +43,24 @@ exports.login = async (req, res) => {
       });
     }
 
+    // GERAR TOKEN JWT
+    const token = jwt.sign(
+      {
+        id: usuario.id,
+        email: usuario.email,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "2h",
+      },
+    );
+
     // LOGIN REALIZADO
     res.status(200).json({
       mensagem: "Login realizado com sucesso",
+
+      token,
+
       usuario: {
         id: usuario.id,
         nome: usuario.nome,
