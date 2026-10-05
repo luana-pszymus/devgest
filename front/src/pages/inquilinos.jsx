@@ -177,7 +177,7 @@ function Inquilinos() {
 
       if (editando) {
         // Primeiro atualiza os dados pessoais.
-        await api.put(`/api/inquilino/listar/${editando.id}`, dadosInquilino);
+        await api.put(`/api/inquilino/${editando.id}`, dadosInquilino);
 
         const dadosContrato = pegarResumo(editando.id);
 
