@@ -717,13 +717,20 @@
 
   inset: 0;
 
-  z-index: 100;
+  /* O modal fica acima da Navbar */
+  z-index: 2000;
 
   display: flex;
 
-  align-items: flex-end;
+  /* Coloca o modal no meio vertical da tela */
+  align-items: center;
 
   justify-content: center;
+
+  /* Evita que o modal encoste nas bordas */
+  padding: 20px;
+
+  box-sizing: border-box;
 
   background: rgba(30, 35, 40, 0.42);
 }
@@ -731,15 +738,22 @@
 .kitnet-modal {
   width: 100%;
 
-  max-width: 600px;
+  max-width: 500px;
 
-  padding: 20px 16px 28px;
+  max-height: calc(100vh - 40px);
 
-  border-radius: 20px 20px 0 0;
+  padding: 20px 16px;
+
+  box-sizing: border-box;
+
+  border-radius: 20px;
 
   background: #ffffff;
 
-  box-shadow: 0 -5px 25px rgba(30, 35, 40, 0.12);
+  box-shadow: 0 5px 25px rgba(30, 35, 40, 0.15);
+
+  /* Se a tela for pequena, o próprio modal pode rolar */
+  overflow-y: auto;
 }
 
 .kitnet-modal-header {
@@ -806,6 +820,8 @@
   color: #68737d;
 
   font-size: 22px;
+
+  cursor: pointer;
 }
 
 .close-modal-button:active {
