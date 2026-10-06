@@ -203,10 +203,7 @@ function Inquilinos() {
         setMensagem("Inquilino atualizado com sucesso!");
       } else {
         // Primeiro cria o inquilino.
-        const resposta = await api.post(
-          "/api/inquilino/listar",
-          dadosInquilino,
-        );
+        const resposta = await api.post("/api/inquilino/", dadosInquilino);
 
         const novoInquilino = resposta.data;
 

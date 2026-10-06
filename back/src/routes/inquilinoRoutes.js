@@ -10,7 +10,7 @@ router.use(autenticar);
 router.get("/listar", inquilinoController.listarInquilinos);
 router.get("/listar/:id", inquilinoController.listarInquilinoId);
 router.post("/", inquilinoController.cadastrarInquilino);
-router.put("/listar/:id", inquilinoController.atualizarInquilino);
+router.put("/:id", inquilinoController.atualizarInquilino);
 router.delete("/:id", inquilinoController.excluirInquilino);
 
 module.exports = router;
