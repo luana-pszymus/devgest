@@ -1,0 +1,41 @@
+.modal-fundo {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1000;
+}
+
+.modal {
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.modal-cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.modal-cabecalho h2 {
+  margin: 0;
+  color: #33312c;
+  font-size: 20px;
+}
+
+.modal-cabecalho button {
+  border: none;
+  background: none;
+  color: #414952;
+  font-size: 24px;
+  cursor: pointer;
+}

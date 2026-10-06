@@ -1,0 +1,46 @@
+.confirmacao-fundo {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1000;
+}
+
+.confirmacao {
+  width: 100%;
+  max-width: 400px;
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.confirmacao p {
+  margin: 0 0 20px;
+  color: #33312c;
+  font-size: 15px;
+}
+
+.confirmacao-botoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.confirmacao-botoes button {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  color: white;
+  cursor: pointer;
+}
+
+.cancelar {
+  background: #414952;
+}
+
+.perigo {
+  background: #b54a4a;
+}
