@@ -1,7 +1,12 @@
 import "./Card.css";
 
-function Card({ children }) {
-  return <div className="card">{children}</div>;
+// Card genérico usado para manter o mesmo padrão visual nas telas.
+function Card({ children, className = "" }) {
+  return (
+    <div className={`card ${className}`}>
+      {children}
+    </div>
+  );
 }
 
 export default Card;

@@ -1,7 +1,12 @@
 import "./Mensagem.css";
 
-function Mensagem({ children }) {
-  return <p className="mensagem">{children}</p>;
+// Mensagem simples usada para avisos, erros e informações.
+function Mensagem({ children, className = "" }) {
+  return (
+    <p className={`mensagem ${className}`}>
+      {children}
+    </p>
+  );
 }
 
 export default Mensagem;

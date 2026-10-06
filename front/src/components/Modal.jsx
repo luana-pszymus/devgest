@@ -1,5 +1,7 @@
 import "./Modal.css";
 
+// Modal genérico.
+// A tela que usa o modal decide qual conteúdo ficará dentro dele.
 function Modal({
   aberto,
   titulo,
@@ -13,6 +15,7 @@ function Modal({
     return null;
   }
 
+  // Fecha somente quando o usuário clica no fundo do modal.
   function fecharAoClicarFora(event) {
     if (
       event.target === event.currentTarget &&
@@ -24,11 +27,11 @@ function Modal({
 
   return (
     <div
-      className="modal-fundo"
+      className="modal-fundo kitnet-modal-background"
       onMouseDown={fecharAoClicarFora}
     >
-      <div className="modal">
-        <div className="modal-cabecalho">
+      <div className="modal kitnet-modal">
+        <div className="modal-cabecalho kitnet-modal-header">
           <div>
             {eyebrow && (
               <span className="modal-eyebrow">
@@ -43,6 +46,7 @@ function Modal({
 
           <button
             type="button"
+            className="close-modal-button"
             onClick={onFechar}
             disabled={bloqueado}
             aria-label="Fechar"

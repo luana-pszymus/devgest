@@ -7,6 +7,7 @@ function formatarMoeda(valor) {
   });
 }
 
+// Mostra todas as informações de uma única kitnet.
 function KitnetCard({
   kitnet,
   contrato,
@@ -22,11 +23,16 @@ function KitnetCard({
           <div className="kitnet-icon">⌂</div>
 
           <div>
-            <span className="kitnet-number">KITNET</span>
+            <span className="kitnet-number">
+              KITNET
+            </span>
 
             <h3>
               {kitnet.numero ||
-                `Kitnet ${String(kitnet.id).padStart(2, "0")}`}
+                `Kitnet ${String(kitnet.id).padStart(
+                  2,
+                  "0",
+                )}`}
             </h3>
           </div>
         </div>
@@ -76,7 +82,7 @@ function KitnetCard({
 
                 <strong>
                   {Number(
-                    ultimoConsumo.consumo_kwh || 0
+                    ultimoConsumo.consumo_kwh || 0,
                   ).toFixed(0)}{" "}
                   kWh
                 </strong>
@@ -87,7 +93,7 @@ function KitnetCard({
 
                 <strong>
                   {formatarMoeda(
-                    ultimoConsumo.valor_energia
+                    ultimoConsumo.valor_energia,
                   )}
                 </strong>
               </div>
@@ -97,8 +103,8 @@ function KitnetCard({
 
         {!ocupada && (
           <div className="available-message">
-            Esta kitnet está disponível para um novo
-            inquilino.
+            Esta kitnet está disponível para um
+            novo inquilino.
           </div>
         )}
       </div>
