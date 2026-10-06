@@ -3,6 +3,7 @@ import Campo from "../components/Campo";
 import Mensagem from "../components/Mensagem";
 import Modal from "../components/Modal";
 
+// Formulário usado para cadastrar uma nova kitnet.
 function FormularioKitnet({
   aberto,
   onFechar,
@@ -24,17 +25,24 @@ function FormularioKitnet({
       onFechar={onFechar}
       bloqueado={salvando}
     >
-      <form className="kitnet-form" onSubmit={onSubmit}>
+      <form
+        className="kitnet-form"
+        onSubmit={onSubmit}
+      >
+        {/* Número da kitnet usa o campo padrão */}
         <Campo
           id="numero-kitnet"
           label="Número da kitnet"
           value={numero}
-          onChange={(event) => setNumero(event.target.value)}
+          onChange={(event) =>
+            setNumero(event.target.value)
+          }
           placeholder="Ex.: 01"
           disabled={salvando}
           autoFocus
         />
 
+        {/* Valor mantém estrutura própria por causa do R$ */}
         <div className="form-field">
           <label htmlFor="valor-aluguel">
             Valor do aluguel
@@ -49,13 +57,16 @@ function FormularioKitnet({
               min="0.01"
               step="0.01"
               value={valor}
-              onChange={(event) => setValor(event.target.value)}
+              onChange={(event) =>
+                setValor(event.target.value)
+              }
               placeholder="500,00"
               disabled={salvando}
             />
           </div>
         </div>
 
+        {/* Mensagens de validação e sucesso */}
         {erro && (
           <Mensagem className="kitnet-form-message error">
             {erro}
@@ -68,6 +79,7 @@ function FormularioKitnet({
           </Mensagem>
         )}
 
+        {/* Ações do formulário */}
         <div className="kitnet-form-actions">
           <Botao
             tipo="cancelar"
@@ -77,8 +89,13 @@ function FormularioKitnet({
             Cancelar
           </Botao>
 
-          <Botao type="submit" disabled={salvando}>
-            {salvando ? "Salvando..." : "Cadastrar kitnet"}
+          <Botao
+            type="submit"
+            disabled={salvando}
+          >
+            {salvando
+              ? "Salvando..."
+              : "Cadastrar kitnet"}
           </Botao>
         </div>
       </form>

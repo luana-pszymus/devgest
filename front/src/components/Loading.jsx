@@ -1,7 +1,12 @@
 import "./Loading.css";
 
-function Loading() {
-  return <p className="loading">Carregando...</p>;
+// Mensagem padrão exibida enquanto os dados estão sendo carregados.
+function Loading({ children = "Carregando..." }) {
+  return (
+    <p className="loading">
+      {children}
+    </p>
+  );
 }
 
 export default Loading;
