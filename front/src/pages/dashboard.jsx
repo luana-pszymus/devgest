@@ -1,8 +1,17 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import Navbar from "../components/Navbar";
+import Botao from "../components/Botao";
+import Card from "../components/Card";
+import Loading from "../components/Loading";
+import Mensagem from "../components/Mensagem";
+
+import KitnetCard from "./KitnetCard";
+import FormularioKitnet from "./FormularioKitnet";
+
 import api from "../services/api";
 import "./dashboard.css";
-import { useNavigate } from "react-router-dom";
 
 const MESES = [
   "Janeiro",
@@ -35,8 +44,11 @@ export default function Dashboard() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
 
-  const [mostrarFormulario, setMostrarFormulario] = useState(false);
-  const [salvandoKitnet, setSalvandoKitnet] = useState(false);
+  const [mostrarFormulario, setMostrarFormulario] =
+    useState(false);
+
+  const [salvandoKitnet, setSalvandoKitnet] =
+    useState(false);
 
   const [numeroKitnet, setNumeroKitnet] = useState("");
   const [valorAluguel, setValorAluguel] = useState("");
@@ -45,13 +57,6 @@ export default function Dashboard() {
   const [erroKitnet, setErroKitnet] = useState("");
 
   const navigate = useNavigate();
-
-  const handleLogout = () => {
-    localStorage.removeItem("usuario");
-    localStorage.removeItem("token");
-
-    navigate("/login");
-  };
 
   useEffect(() => {
     carregarDados();
@@ -74,15 +79,29 @@ export default function Dashboard() {
         api.get("/api/consumo/listar"),
       ]);
 
-      const kitnetsData = kitnetsResponse.data;
-      const contratosData = contratosResponse.data;
-      const inquilinosData = inquilinosResponse.data;
-      const consumosData = consumosResponse.data;
+      setKitnets(
+        Array.isArray(kitnetsResponse.data)
+          ? kitnetsResponse.data
+          : [],
+      );
 
-      setKitnets(Array.isArray(kitnetsData) ? kitnetsData : []);
-      setContratos(Array.isArray(contratosData) ? contratosData : []);
-      setInquilinos(Array.isArray(inquilinosData) ? inquilinosData : []);
-      setConsumos(Array.isArray(consumosData) ? consumosData : []);
+      setContratos(
+        Array.isArray(contratosResponse.data)
+          ? contratosResponse.data
+          : [],
+      );
+
+      setInquilinos(
+        Array.isArray(inquilinosResponse.data)
+          ? inquilinosResponse.data
+          : [],
+      );
+
+      setConsumos(
+        Array.isArray(consumosResponse.data)
+          ? consumosResponse.data
+          : [],
+      );
     } catch (error) {
       console.error("Erro ao carregar Dashboard:", error);
       setErro("Não foi possível carregar os dados.");
@@ -94,7 +113,8 @@ export default function Dashboard() {
   function encontrarContrato(kitnetId) {
     return contratos.find(
       (contrato) =>
-        Number(contrato.kitnet_id) === Number(kitnetId) && !contrato.data_fim,
+        Number(contrato.kitnet_id) === Number(kitnetId) &&
+        !contrato.data_fim,
     );
   }
 
@@ -102,13 +122,19 @@ export default function Dashboard() {
     if (!contrato) return null;
 
     return inquilinos.find(
-      (inquilino) => Number(inquilino.id) === Number(contrato.inquilino_id),
+      (inquilino) =>
+        Number(inquilino.id) ===
+        Number(contrato.inquilino_id),
     );
   }
 
   function encontrarUltimoConsumo(contratoId) {
     const registros = consumos
-      .filter((consumo) => Number(consumo.contrato_id) === Number(contratoId))
+      .filter(
+        (consumo) =>
+          Number(consumo.contrato_id) ===
+          Number(contratoId),
+      )
       .sort((a, b) => {
         const anoA = Number(a.ano);
         const anoB = Number(b.ano);
@@ -158,31 +184,37 @@ export default function Dashboard() {
     }
 
     if (!valor || valor <= 0) {
-      setErroKitnet("Informe um valor de aluguel válido.");
+      setErroKitnet(
+        "Informe um valor de aluguel válido.",
+      );
       return;
     }
 
     const numeroJaExiste = kitnets.some(
       (kitnet) =>
-        String(kitnet.numero).trim().toLowerCase() === numero.toLowerCase(),
+        String(kitnet.numero)
+          .trim()
+          .toLowerCase() === numero.toLowerCase(),
     );
 
     if (numeroJaExiste) {
-      setErroKitnet("Já existe uma kitnet com esse número.");
+      setErroKitnet(
+        "Já existe uma kitnet com esse número.",
+      );
       return;
     }
 
     try {
       setSalvandoKitnet(true);
 
-      const response = await api.post("/api/kitnet", {
+      await api.post("/api/kitnet", {
         numero,
         valor_aluguel: valor,
       });
 
-      console.log(response.data);
-
-      setMensagemKitnet("Kitnet cadastrada com sucesso.");
+      setMensagemKitnet(
+        "Kitnet cadastrada com sucesso.",
+      );
 
       setNumeroKitnet("");
       setValorAluguel("");
@@ -207,38 +239,53 @@ export default function Dashboard() {
     }
   }
 
+  function handleLogout() {
+    localStorage.removeItem("usuario");
+    localStorage.removeItem("token");
+
+    navigate("/login");
+  }
+
   const totalKitnets = kitnets.length;
 
   const kitnetsOcupadas = kitnets.filter((kitnet) =>
     encontrarContrato(kitnet.id),
   ).length;
 
-  const kitnetsDisponiveis = totalKitnets - kitnetsOcupadas;
+  const kitnetsDisponiveis =
+    totalKitnets - kitnetsOcupadas;
 
   const valorAlugueis = kitnets
     .filter((kitnet) => encontrarContrato(kitnet.id))
-    .reduce((total, kitnet) => total + Number(kitnet.valor_aluguel || 0), 0);
+    .reduce(
+      (total, kitnet) =>
+        total + Number(kitnet.valor_aluguel || 0),
+      0,
+    );
 
   const mesAtual = new Date().getMonth() + 1;
   const anoAtual = new Date().getFullYear();
 
   const consumosMesAtual = consumos.filter(
     (consumo) =>
-      Number(consumo.mes) === mesAtual && Number(consumo.ano) === anoAtual,
+      Number(consumo.mes) === mesAtual &&
+      Number(consumo.ano) === anoAtual,
   );
 
   const valorEnergiaMes = consumosMesAtual.reduce(
-    (total, consumo) => total + Number(consumo.valor_energia || 0),
+    (total, consumo) =>
+      total + Number(consumo.valor_energia || 0),
     0,
   );
 
   return (
     <div className="dashboard">
       <main className="dashboard-content">
-        {/* CABEÇALHO */}
         <header className="dashboard-header">
           <div>
-            <span className="dashboard-eyebrow">GESTÃO DE KITNETS</span>
+            <span className="dashboard-eyebrow">
+              GESTÃO DE KITNETS
+            </span>
 
             <h1>Visão geral</h1>
 
@@ -248,47 +295,51 @@ export default function Dashboard() {
           </div>
 
           <div className="dashboard-header-actions">
-            <button
-              className="refresh-button"
+            <Botao
               onClick={carregarDados}
               title="Atualizar dados"
               aria-label="Atualizar dados"
             >
               ↻
-            </button>
+            </Botao>
 
-            <button
-              className="logout-button"
+            <Botao
+              tipo="cancelar"
               onClick={handleLogout}
-              title="Sair do sistema"
             >
               Sair
-            </button>
+            </Botao>
           </div>
         </header>
 
-        {/* ERRO */}
         {erro && (
           <div className="dashboard-error">
-            <strong>Não foi possível carregar os dados.</strong>
+            <strong>
+              Não foi possível carregar os dados.
+            </strong>
 
-            <button onClick={carregarDados}>Tentar novamente</button>
+            <Botao onClick={carregarDados}>
+              Tentar novamente
+            </Botao>
           </div>
         )}
 
-        {/* CARREGANDO */}
         {carregando ? (
           <div className="dashboard-loading">
             <div className="loading-circle"></div>
-            <p>Carregando seus dados...</p>
+
+            <Loading>
+              Carregando seus dados...
+            </Loading>
           </div>
         ) : (
           <>
-            {/* RESUMO */}
             <section className="summary-section">
-              <div className="summary-card summary-main">
+              <Card className="summary-card summary-main">
                 <div>
-                  <span className="summary-label">Aluguéis cadastrados</span>
+                  <span className="summary-label">
+                    Aluguéis cadastrados
+                  </span>
 
                   <strong className="summary-value">
                     {formatarMoeda(valorAlugueis)}
@@ -301,174 +352,109 @@ export default function Dashboard() {
                       : "kitnets ocupadas"}
                   </span>
                 </div>
-              </div>
+              </Card>
 
               <div className="summary-grid">
-                <div className="summary-card">
-                  <div className="summary-icon blue">⌂</div>
+                <Card className="summary-card">
+                  <div className="summary-icon blue">
+                    ⌂
+                  </div>
 
                   <strong>{totalKitnets}</strong>
 
                   <span>Total de kitnets</span>
-                </div>
+                </Card>
 
-                <div className="summary-card">
-                  <div className="summary-icon yellow">✓</div>
+                <Card className="summary-card">
+                  <div className="summary-icon yellow">
+                    ✓
+                  </div>
 
                   <strong>{kitnetsOcupadas}</strong>
 
                   <span>Ocupadas</span>
-                </div>
+                </Card>
 
-                <div className="summary-card">
-                  <div className="summary-icon green">+</div>
+                <Card className="summary-card">
+                  <div className="summary-icon green">
+                    +
+                  </div>
 
                   <strong>{kitnetsDisponiveis}</strong>
 
                   <span>Disponíveis</span>
-                </div>
+                </Card>
 
-                <div className="summary-card energy-summary">
-                  <div className="summary-icon yellow">⚡</div>
+                <Card className="summary-card energy-summary">
+                  <div className="summary-icon yellow">
+                    ⚡
+                  </div>
 
-                  <strong>{formatarMoeda(valorEnergiaMes)}</strong>
+                  <strong>
+                    {formatarMoeda(valorEnergiaMes)}
+                  </strong>
 
                   <span>Energia no mês</span>
-                </div>
+                </Card>
               </div>
             </section>
 
-            {/* KITNETS */}
             <section className="kitnets-section">
               <div className="section-heading">
                 <div>
-                  <span className="section-eyebrow">SEUS IMÓVEIS</span>
+                  <span className="section-eyebrow">
+                    SEUS IMÓVEIS
+                  </span>
 
                   <h2>Kitnets</h2>
                 </div>
 
-                <button
-                  className="add-kitnet-button"
-                  onClick={abrirFormularioKitnet}
-                >
-                  <span>+</span>
-                  Adicionar kitnet
-                </button>
+                <Botao onClick={abrirFormularioKitnet}>
+                  + Adicionar kitnet
+                </Botao>
               </div>
 
               {kitnets.length === 0 ? (
                 <div className="empty-dashboard">
                   <div className="empty-icon">⌂</div>
 
-                  <h3>Nenhuma kitnet cadastrada</h3>
+                  <h3>
+                    Nenhuma kitnet cadastrada
+                  </h3>
 
-                  <p>Cadastre sua primeira kitnet para começar.</p>
+                  <Mensagem>
+                    Cadastre sua primeira kitnet para
+                    começar.
+                  </Mensagem>
 
-                  <button
-                    className="empty-add-button"
+                  <Botao
                     onClick={abrirFormularioKitnet}
                   >
                     + Adicionar kitnet
-                  </button>
+                  </Botao>
                 </div>
               ) : (
                 <div className="kitnet-list">
                   {kitnets.map((kitnet) => {
-                    const contrato = encontrarContrato(kitnet.id);
-                    const inquilino = encontrarInquilino(contrato);
-                    const ultimoConsumo = encontrarUltimoConsumo(contrato?.id);
+                    const contrato =
+                      encontrarContrato(kitnet.id);
 
-                    const ocupada = Boolean(contrato);
+                    const inquilino =
+                      encontrarInquilino(contrato);
+
+                    const ultimoConsumo =
+                      encontrarUltimoConsumo(
+                        contrato?.id,
+                      );
 
                     return (
-                      <article className="kitnet-card" key={kitnet.id}>
-                        <div className="kitnet-card-header">
-                          <div className="kitnet-title-area">
-                            <div className="kitnet-icon">⌂</div>
-
-                            <div>
-                              <span className="kitnet-number">KITNET</span>
-
-                              <h3>
-                                {kitnet.numero ||
-                                  `Kitnet ${String(kitnet.id).padStart(
-                                    2,
-                                    "0",
-                                  )}`}
-                              </h3>
-                            </div>
-                          </div>
-
-                          <span
-                            className={
-                              ocupada
-                                ? "occupancy occupied"
-                                : "occupancy available"
-                            }
-                          >
-                            <span className="occupancy-dot"></span>
-
-                            {ocupada ? "Ocupada" : "Disponível"}
-                          </span>
-                        </div>
-
-                        <div className="kitnet-divider"></div>
-
-                        <div className="kitnet-info">
-                          <div className="info-row">
-                            <span>Aluguel</span>
-
-                            <strong>
-                              {formatarMoeda(kitnet.valor_aluguel)}
-                            </strong>
-                          </div>
-
-                          <div className="info-row">
-                            <span>Inquilino</span>
-
-                            <strong>
-                              {inquilino?.nome || "Nenhum inquilino"}
-                            </strong>
-                          </div>
-
-                          {ultimoConsumo && (
-                            <div className="energy-info">
-                              <div className="energy-title">
-                                <span>⚡</span>
-                                <strong>Último consumo</strong>
-                              </div>
-
-                              <div className="energy-values">
-                                <div>
-                                  <span>Consumo</span>
-
-                                  <strong>
-                                    {Number(
-                                      ultimoConsumo.consumo_kwh || 0,
-                                    ).toFixed(0)}{" "}
-                                    kWh
-                                  </strong>
-                                </div>
-
-                                <div>
-                                  <span>Energia</span>
-
-                                  <strong>
-                                    {formatarMoeda(ultimoConsumo.valor_energia)}
-                                  </strong>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-
-                          {!ocupada && (
-                            <div className="available-message">
-                              Esta kitnet está disponível para um novo
-                              inquilino.
-                            </div>
-                          )}
-                        </div>
-                      </article>
+                      <KitnetCard
+                        key={kitnet.id}
+                        kitnet={kitnet}
+                        contrato={contrato}
+                        inquilino={inquilino}
+                        ultimoConsumo={ultimoConsumo}
+                      />
                     );
                   })}
                 </div>
@@ -478,102 +464,18 @@ export default function Dashboard() {
         )}
       </main>
 
-      {/* MODAL — ADICIONAR KITNET */}
-      {mostrarFormulario && (
-        <div
-          className="kitnet-modal-background"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) {
-              fecharFormularioKitnet();
-            }
-          }}
-        >
-          <div className="kitnet-modal">
-            <div className="kitnet-modal-header">
-              <div>
-                <span className="modal-eyebrow">NOVO IMÓVEL</span>
-
-                <h2>Adicionar kitnet</h2>
-
-                <p>Informe os dados básicos da kitnet.</p>
-              </div>
-
-              <button
-                className="close-modal-button"
-                onClick={fecharFormularioKitnet}
-                disabled={salvandoKitnet}
-                aria-label="Fechar"
-              >
-                ×
-              </button>
-            </div>
-
-            <form className="kitnet-form" onSubmit={cadastrarKitnet}>
-              <div className="form-field">
-                <label htmlFor="numero-kitnet">Número da kitnet</label>
-
-                <input
-                  id="numero-kitnet"
-                  type="text"
-                  value={numeroKitnet}
-                  onChange={(event) => setNumeroKitnet(event.target.value)}
-                  placeholder="Ex.: 01"
-                  disabled={salvandoKitnet}
-                  autoFocus
-                />
-              </div>
-
-              <div className="form-field">
-                <label htmlFor="valor-aluguel">Valor do aluguel</label>
-
-                <div className="money-input">
-                  <span>R$</span>
-
-                  <input
-                    id="valor-aluguel"
-                    type="number"
-                    min="0.01"
-                    step="0.01"
-                    value={valorAluguel}
-                    onChange={(event) => setValorAluguel(event.target.value)}
-                    placeholder="500,00"
-                    disabled={salvandoKitnet}
-                  />
-                </div>
-              </div>
-
-              {erroKitnet && (
-                <div className="kitnet-form-message error">{erroKitnet}</div>
-              )}
-
-              {mensagemKitnet && (
-                <div className="kitnet-form-message success">
-                  {mensagemKitnet}
-                </div>
-              )}
-
-              <div className="kitnet-form-actions">
-                <button
-                  type="button"
-                  className="cancel-kitnet-button"
-                  onClick={fecharFormularioKitnet}
-                  disabled={salvandoKitnet}
-                >
-                  Cancelar
-                </button>
-
-                <button
-                  type="submit"
-                  className="save-kitnet-button"
-                  disabled={salvandoKitnet}
-                >
-                  {salvandoKitnet ? "Salvando..." : "Cadastrar kitnet"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <FormularioKitnet
+        aberto={mostrarFormulario}
+        onFechar={fecharFormularioKitnet}
+        onSubmit={cadastrarKitnet}
+        numero={numeroKitnet}
+        setNumero={setNumeroKitnet}
+        valor={valorAluguel}
+        setValor={setValorAluguel}
+        erro={erroKitnet}
+        mensagem={mensagemKitnet}
+        salvando={salvandoKitnet}
+      />
 
       <Navbar />
     </div>

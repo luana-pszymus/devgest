@@ -21,21 +21,41 @@
 
 .modal-cabecalho {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
+  gap: 20px;
   margin-bottom: 20px;
 }
 
 .modal-cabecalho h2 {
-  margin: 0;
+  margin: 4px 0 6px;
   color: #33312c;
   font-size: 20px;
 }
 
+.modal-cabecalho p {
+  margin: 0;
+  color: #414952;
+  font-size: 14px;
+}
+
+.modal-eyebrow {
+  color: #4a80b7;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
 .modal-cabecalho button {
+  flex-shrink: 0;
   border: none;
   background: none;
   color: #414952;
   font-size: 24px;
   cursor: pointer;
+}
+
+.modal-cabecalho button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
