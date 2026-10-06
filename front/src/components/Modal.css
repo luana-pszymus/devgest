@@ -1,61 +1,116 @@
+/* Fundo escuro atrás do modal */
 .modal-fundo {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+
+  background: rgba(0, 0, 0, 0.45);
+
   display: flex;
-  align-items: center;
+
+  /* Mantém o modal mais para cima da tela */
+  align-items: flex-start;
+
   justify-content: center;
-  padding: 20px;
-  z-index: 1000;
+
+  /* Espaço do topo + espaço lateral */
+  padding: 70px 20px 20px;
+
+  box-sizing: border-box;
+
+  /* Fica acima da Navbar */
+  z-index: 2000;
 }
 
+/* Caixa branca do modal */
 .modal {
   width: 100%;
   max-width: 500px;
-  max-height: 90vh;
-  overflow-y: auto;
+
+  max-height: calc(100vh - 90px);
+
   background: white;
+
   border-radius: 12px;
+
   padding: 20px;
+
+  box-sizing: border-box;
+
+  /* Se o conteúdo ficar maior que a tela,
+     somente o conteúdo do modal rola */
+  overflow-y: auto;
 }
 
+/* Cabeçalho do modal */
 .modal-cabecalho {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 20px;
+
+  gap: 15px;
+
   margin-bottom: 20px;
 }
 
+/* Título */
 .modal-cabecalho h2 {
-  margin: 4px 0 6px;
+  margin: 0;
+
   color: #33312c;
+
   font-size: 20px;
 }
 
+/* Descrição abaixo do título */
 .modal-cabecalho p {
-  margin: 0;
-  color: #414952;
+  margin: 6px 0 0;
+
+  color: #707780;
+
   font-size: 14px;
 }
 
+/* Texto pequeno acima do título */
 .modal-eyebrow {
+  display: block;
+
+  margin-bottom: 4px;
+
   color: #4a80b7;
+
   font-size: 11px;
+
   font-weight: 700;
-  letter-spacing: 0.08em;
+
+  letter-spacing: 0.5px;
 }
 
+/* Botão X para fechar */
 .modal-cabecalho button {
   flex-shrink: 0;
+
   border: none;
-  background: none;
+
+  background: transparent;
+
   color: #414952;
+
   font-size: 24px;
+
+  line-height: 1;
+
   cursor: pointer;
 }
 
+/* Estado quando o mouse passa no X */
+.modal-cabecalho button:hover {
+  color: #33312c;
+}
+
+/* Evita aparência de botão ativo quando estiver bloqueado */
 .modal-cabecalho button:disabled {
-  opacity: 0.5;
+  
   cursor: not-allowed;
+
+  opacity: 0.5;
 }
