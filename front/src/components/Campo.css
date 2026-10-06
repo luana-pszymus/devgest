@@ -1,0 +1,27 @@
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.campo span {
+  font-size: 14px;
+  font-weight: 600;
+  color: #33312c;
+}
+
+.campo input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 12px;
+  border: 1px solid #d9dde1;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #33312c;
+  background: white;
+}
+
+.campo input:focus {
+  outline: none;
+  border-color: #4a80b7;
+}

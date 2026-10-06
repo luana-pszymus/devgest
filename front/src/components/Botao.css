@@ -1,0 +1,28 @@
+.botao {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.principal {
+  background: #4a80b7;
+  color: white;
+}
+
+.cancelar {
+  background: #414952;
+  color: white;
+}
+
+.energia {
+  background: #b78731;
+  color: white;
+}
+
+.perigo {
+  background: #b54a4a;
+  color: white;
+}

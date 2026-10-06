@@ -24,6 +24,16 @@ const Usuario = database.define("Usuario", {
     type: Sequelize.STRING,
     allowNull: false,
   },
+
+  codigo_verificacao: {
+    type: Sequelize.STRING,
+    allowNull: true,
+  },
+
+  codigo_expira: {
+    type: Sequelize.DATE,
+    allowNull: true,
+  },
 });
 
 module.exports = Usuario;
