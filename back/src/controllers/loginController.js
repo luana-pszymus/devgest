@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 const Usuario = require("../models/loginModel");
 const nodemailer = require("nodemailer");
 
@@ -10,74 +11,58 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// LOGIN
+// Gera, salva e envia o código (usada pelo login e pelo reenvio)
+async function gerarEEnviarCodigo(usuario) {
+  const codigo = crypto.randomInt(100000, 1000000).toString();
+
+  await usuario.update({
+    codigo_verificacao: codigo,
+    codigo_expira: new Date(Date.now() + 5 * 60 * 1000),
+  });
+
+  await transporter.sendMail({
+    from: process.env.EMAIL_USER,
+    to: usuario.email,
+    subject: "Código de autenticação",
+    text: `Seu código de autenticação é: ${codigo}\nEle expira em 5 minutos.`,
+  });
+}
+
+// LOGIN (etapa 1): confere e-mail e senha e envia o código
 exports.login = async (req, res) => {
   try {
     const { email, senha } = req.body;
 
-    // VALIDAR CAMPOS
     if (!email || !senha) {
       return res.status(400).json({
         erro: "E-mail e senha são obrigatórios",
       });
     }
 
-    // BUSCAR USUÁRIO PELO E-MAIL
-    const usuario = await Usuario.findOne({
-      where: {
-        email: email,
-      },
-    });
+    const usuario = await Usuario.findOne({ where: { email } });
 
-    // VERIFICAR SE USUÁRIO EXISTE
-    if (!usuario) {
+    if (!usuario || usuario.senha !== senha) {
       return res.status(401).json({
         erro: "E-mail ou senha inválidos",
       });
     }
 
-    // VERIFICAR SENHA
-    if (usuario.senha !== senha) {
-      return res.status(401).json({
-        erro: "E-mail ou senha inválidos",
-      });
-    }
+    await gerarEEnviarCodigo(usuario);
 
-    // GERAR TOKEN JWT
-    const token = jwt.sign(
-      {
-        id: usuario.id,
-        email: usuario.email,
-      },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "2h",
-      },
-    );
-
-    // LOGIN REALIZADO
     res.status(200).json({
-      mensagem: "Login realizado com sucesso",
-
-      token,
-
-      usuario: {
-        id: usuario.id,
-        nome: usuario.nome,
-        email: usuario.email,
-      },
+      mensagem: "Código enviado para o e-mail",
+      email: usuario.email,
     });
   } catch (error) {
     console.error(error);
 
     res.status(500).json({
       erro: "Erro ao realizar login",
-      detalhes: error.message,
     });
   }
 };
 
-// ENVIAR CÓDIGO POR E-MAIL
+// REENVIAR CÓDIGO POR E-MAIL
 exports.enviarCodigo = async (req, res) => {
   try {
     const { email } = req.body;
@@ -88,11 +73,7 @@ exports.enviarCodigo = async (req, res) => {
       });
     }
 
-    const usuario = await Usuario.findOne({
-      where: {
-        email,
-      },
-    });
+    const usuario = await Usuario.findOne({ where: { email } });
 
     if (!usuario) {
       return res.status(404).json({
@@ -100,21 +81,7 @@ exports.enviarCodigo = async (req, res) => {
       });
     }
 
-    const codigo = Math.floor(100000 + Math.random() * 900000);
-
-    const codigoExpira = new Date(Date.now() + 5 * 60 * 1000);
-
-    await usuario.update({
-      codigo_verificacao: codigo.toString(),
-      codigo_expira: codigoExpira,
-    });
-
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: usuario.email,
-      subject: "Código de autenticação",
-      text: `Seu código de autenticação é: ${codigo}`,
-    });
+    await gerarEEnviarCodigo(usuario);
 
     res.status(200).json({
       mensagem: "Código enviado para o e-mail",
@@ -124,12 +91,11 @@ exports.enviarCodigo = async (req, res) => {
 
     res.status(500).json({
       erro: "Erro ao enviar código",
-      detalhes: error.message,
     });
   }
 };
 
-// VERIFICAR CÓDIGO
+// VERIFICAR CÓDIGO (etapa 2): confere o código e devolve o token
 exports.verificarCodigo = async (req, res) => {
   try {
     const { email, codigo } = req.body;
@@ -140,11 +106,7 @@ exports.verificarCodigo = async (req, res) => {
       });
     }
 
-    const usuario = await Usuario.findOne({
-      where: {
-        email,
-      },
-    });
+    const usuario = await Usuario.findOne({ where: { email } });
 
     if (!usuario) {
       return res.status(404).json({
@@ -152,7 +114,10 @@ exports.verificarCodigo = async (req, res) => {
       });
     }
 
-    if (usuario.codigo_verificacao !== codigo.toString()) {
+    if (
+      !usuario.codigo_verificacao ||
+      usuario.codigo_verificacao !== codigo.toString()
+    ) {
       return res.status(401).json({
         erro: "Código inválido",
       });
@@ -169,8 +134,20 @@ exports.verificarCodigo = async (req, res) => {
       codigo_expira: null,
     });
 
+    const token = jwt.sign(
+      {
+        id: usuario.id,
+        email: usuario.email,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "2h",
+      },
+    );
+
     res.status(200).json({
       mensagem: "Autenticação realizada com sucesso",
+      token,
       usuario: {
         id: usuario.id,
         nome: usuario.nome,
@@ -182,7 +159,6 @@ exports.verificarCodigo = async (req, res) => {
 
     res.status(500).json({
       erro: "Erro ao verificar código",
-      detalhes: error.message,
     });
   }
 };
