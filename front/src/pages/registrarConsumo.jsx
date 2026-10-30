@@ -1,6 +1,8 @@
+
 import { useEffect, useMemo, useState } from "react";
 import api from "../services/api";
 import Navbar from "../components/Navbar";
+import LeitorMedidor from "../components/LeitorMedidor";
 import "./registrarConsumo.css";
 
 const MESES = [
@@ -40,7 +42,6 @@ function RegistrarConsumo() {
   const [filtroInquilino, setFiltroInquilino] = useState("");
 
   const [mes, setMes] = useState(String(dataAtual.getMonth() + 1));
-
   const [ano, setAno] = useState(dataAtual.getFullYear());
 
   const [leituraAtual, setLeituraAtual] = useState("");
@@ -48,23 +49,32 @@ function RegistrarConsumo() {
 
   const [leituraAnterior, setLeituraAnterior] = useState(null);
 
+  // Guarda a imagem para exibição e o arquivo para envio ao backend.
   const [foto, setFoto] = useState(null);
+  const [arquivoFoto, setArquivoFoto] = useState(null);
+
+  // Controla a abertura da câmera.
+  const [abrirLeitor, setAbrirLeitor] = useState(false);
 
   const [carregando, setCarregando] = useState(true);
-
   const [salvando, setSalvando] = useState(false);
-
   const [mensagem, setMensagem] = useState("");
-
   const [erro, setErro] = useState("");
-
   const [apagando, setApagando] = useState(null);
-
   const [confirmarExclusao, setConfirmarExclusao] = useState(null);
 
   useEffect(() => {
     carregarDados();
   }, []);
+
+  // Libera a imagem temporária quando a tela é fechada.
+  useEffect(() => {
+    return () => {
+      if (foto) {
+        URL.revokeObjectURL(foto);
+      }
+    };
+  }, [foto]);
 
   // Busca os dados necessários para a tela.
   async function carregarDados() {
@@ -80,19 +90,24 @@ function RegistrarConsumo() {
         ]);
 
       setContratos(
-        Array.isArray(contratosResponse.data) ? contratosResponse.data : [],
+        Array.isArray(contratosResponse.data)
+          ? contratosResponse.data
+          : []
       );
 
       setInquilinos(
-        Array.isArray(inquilinosResponse.data) ? inquilinosResponse.data : [],
+        Array.isArray(inquilinosResponse.data)
+          ? inquilinosResponse.data
+          : []
       );
 
       setConsumos(
-        Array.isArray(consumosResponse.data) ? consumosResponse.data : [],
+        Array.isArray(consumosResponse.data)
+          ? consumosResponse.data
+          : []
       );
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
-
       setErro("Não foi possível carregar os dados.");
     } finally {
       setCarregando(false);
@@ -115,7 +130,6 @@ function RegistrarConsumo() {
       .filter((consumo) => Number(consumo.contrato_id) === Number(id))
       .sort((a, b) => {
         const dataA = Number(a.ano) * 100 + Number(a.mes);
-
         const dataB = Number(b.ano) * 100 + Number(b.mes);
 
         return dataB - dataA;
@@ -123,10 +137,28 @@ function RegistrarConsumo() {
 
     const ultimoConsumo = registros[0];
 
-    setLeituraAnterior(ultimoConsumo ? Number(ultimoConsumo.leitura_atual) : 0);
+    setLeituraAnterior(
+      ultimoConsumo ? Number(ultimoConsumo.leitura_atual) : 0
+    );
   }
 
-  // Registra uma nova leitura no backend.
+  // Recebe a foto e a leitura confirmada pelo leitor.
+  function confirmarLeitura(dados) {
+    if (foto) {
+      URL.revokeObjectURL(foto);
+    }
+
+    const url = URL.createObjectURL(dados.arquivo);
+
+    setFoto(url);
+    setArquivoFoto(dados.arquivo);
+    setLeituraAtual(dados.leitura);
+    setAbrirLeitor(false);
+    setErro("");
+    setMensagem("Foto e leitura adicionadas ao formulário.");
+  }
+
+  // Registra uma nova leitura e envia a foto ao backend.
   async function registrarConsumo(e) {
     e.preventDefault();
 
@@ -140,9 +172,18 @@ function RegistrarConsumo() {
       return;
     }
 
+    if (!Number.isFinite(Number(leituraAtual))) {
+      setErro("Digite uma leitura válida.");
+      return;
+    }
+
     if (Number(leituraAtual) < Number(leituraAnterior || 0)) {
       setErro("A leitura atual não pode ser menor que a leitura anterior.");
+      return;
+    }
 
+    if (!precoKwh || Number(precoKwh) <= 0) {
+      setErro("Informe um preço válido para o kWh.");
       return;
     }
 
@@ -151,27 +192,45 @@ function RegistrarConsumo() {
       setMensagem("");
       setErro("");
 
-      const response = await api.post("/api/consumo/registrar", {
-        contrato_id: Number(contratoId),
-        mes: Number(mes),
-        ano: Number(ano),
-        leitura_atual: Number(leituraAtual),
-        preco_kwh: Number(precoKwh),
-      });
+      // Prepara os campos e a foto para envio.
+      const dados = new FormData();
+
+      dados.append("contrato_id", Number(contratoId));
+      dados.append("mes", Number(mes));
+      dados.append("ano", Number(ano));
+      dados.append("leitura_atual", Number(leituraAtual));
+      dados.append("preco_kwh", Number(precoKwh));
+
+      if (arquivoFoto) {
+        dados.append("foto", arquivoFoto);
+      }
+
+      const response = await api.post(
+        "/api/consumo/registrar",
+        dados
+      );
 
       await carregarDados();
 
-      setMensagem(response.data?.mensagem || "Consumo registrado com sucesso!");
+      setMensagem(
+        response.data?.mensagem || "Consumo registrado com sucesso!"
+      );
 
       setLeituraAnterior(Number(leituraAtual));
-
       setLeituraAtual("");
+      setArquivoFoto(null);
+
+      if (foto) {
+        URL.revokeObjectURL(foto);
+      }
+
       setFoto(null);
     } catch (error) {
       console.error("Erro ao registrar consumo:", error);
 
       setErro(
-        error.response?.data?.erro || "Não foi possível registrar o consumo.",
+        error.response?.data?.erro ||
+          "Não foi possível registrar o consumo."
       );
     } finally {
       setSalvando(false);
@@ -203,40 +262,29 @@ function RegistrarConsumo() {
 
       await api.delete(`/api/consumo/${id}`);
 
-      setConsumos((lista) => lista.filter((item) => item.id !== id));
+      setConsumos((lista) =>
+        lista.filter((item) => item.id !== id)
+      );
 
       setMensagem("Registro excluído com sucesso.");
-
       setConfirmarExclusao(null);
     } catch (error) {
       console.error("Erro ao excluir consumo:", error);
 
       setErro("Não foi possível excluir o registro.");
-
       setConfirmarExclusao(null);
     } finally {
       setApagando(null);
     }
   }
 
-  // Abre a câmera do celular para fotografar o medidor.
-  function tirarFoto(e) {
-    const arquivo = e.target.files?.[0];
-
-    if (!arquivo) return;
-
-    const url = URL.createObjectURL(arquivo);
-
-    setFoto(url);
-  }
-
   const contratoSelecionado = contratos.find(
-    (contrato) => Number(contrato.id) === Number(contratoId),
+    (contrato) => Number(contrato.id) === Number(contratoId)
   );
 
   const inquilinoSelecionado = inquilinos.find(
     (inquilino) =>
-      Number(inquilino.id) === Number(contratoSelecionado?.inquilino_id),
+      Number(inquilino.id) === Number(contratoSelecionado?.inquilino_id)
   );
 
   // Filtra o histórico pelo inquilino escolhido.
@@ -247,12 +295,12 @@ function RegistrarConsumo() {
       const contratosDoInquilino = contratos
         .filter(
           (contrato) =>
-            Number(contrato.inquilino_id) === Number(filtroInquilino),
+            Number(contrato.inquilino_id) === Number(filtroInquilino)
         )
         .map((contrato) => Number(contrato.id));
 
       lista = lista.filter((consumo) =>
-        contratosDoInquilino.includes(Number(consumo.contrato_id)),
+        contratosDoInquilino.includes(Number(consumo.contrato_id))
       );
     }
 
@@ -282,11 +330,11 @@ function RegistrarConsumo() {
 
   function nomeDoInquilino(contratoIdDoHistorico) {
     const contrato = contratos.find(
-      (item) => Number(item.id) === Number(contratoIdDoHistorico),
+      (item) => Number(item.id) === Number(contratoIdDoHistorico)
     );
 
     const inquilino = inquilinos.find(
-      (item) => Number(item.id) === Number(contrato?.inquilino_id),
+      (item) => Number(item.id) === Number(contrato?.inquilino_id)
     );
 
     return inquilino?.nome || "Inquilino não identificado";
@@ -294,7 +342,7 @@ function RegistrarConsumo() {
 
   function numeroDaKitnet(contratoIdDoHistorico) {
     const contrato = contratos.find(
-      (item) => Number(item.id) === Number(contratoIdDoHistorico),
+      (item) => Number(item.id) === Number(contratoIdDoHistorico)
     );
 
     return contrato?.kitnet_id || "-";
@@ -307,9 +355,7 @@ function RegistrarConsumo() {
         <header className="consumo-header">
           <div>
             <span className="consumo-eyebrow">CONTROLE DE ENERGIA</span>
-
             <h1>Energia</h1>
-
             <p>Registre a leitura e acompanhe o histórico.</p>
           </div>
 
@@ -319,7 +365,6 @@ function RegistrarConsumo() {
         {carregando ? (
           <div className="consumo-loading">
             <div className="loading-circle"></div>
-
             <p>Carregando dados...</p>
           </div>
         ) : (
@@ -328,7 +373,6 @@ function RegistrarConsumo() {
             {erro && (
               <div className="form-message error">
                 <strong>Ops!</strong>
-
                 <span>{erro}</span>
               </div>
             )}
@@ -337,7 +381,6 @@ function RegistrarConsumo() {
             {mensagem && (
               <div className="form-message success">
                 <strong>✓ Tudo certo!</strong>
-
                 <span>{mensagem}</span>
               </div>
             )}
@@ -347,7 +390,6 @@ function RegistrarConsumo() {
               <div className="photo-card">
                 <div>
                   <strong>Foto do medidor</strong>
-
                   <span>Use a foto para conferir a leitura.</span>
                 </div>
 
@@ -364,7 +406,6 @@ function RegistrarConsumo() {
 
                   <div>
                     <strong>Imóvel</strong>
-
                     <span>Escolha a kitnet que será registrada.</span>
                   </div>
                 </div>
@@ -409,7 +450,6 @@ function RegistrarConsumo() {
 
                   <div>
                     <strong>Período</strong>
-
                     <span>Em qual mês essa leitura foi feita?</span>
                   </div>
                 </div>
@@ -453,8 +493,7 @@ function RegistrarConsumo() {
 
                   <div>
                     <strong>Leitura do medidor</strong>
-
-                    <span>Digite o número mostrado no relógio.</span>
+                    <span>Digite ou fotografe o número mostrado no relógio.</span>
                   </div>
                 </div>
 
@@ -489,24 +528,18 @@ function RegistrarConsumo() {
                       <span>kWh</span>
                     </div>
 
-                    {/* CÂMERA */}
-                    <label
+                    <button
+                      type="button"
                       className="camera-button"
-                      title="Tirar foto do medidor"
+                      title="Fotografar e reconhecer o medidor"
+                      onClick={() => setAbrirLeitor(true)}
                     >
                       <span>📷</span>
-
-                      <input
-                        type="file"
-                        accept="image/*"
-                        capture="environment"
-                        onChange={tirarFoto}
-                      />
-                    </label>
+                    </button>
                   </div>
 
                   <span className="camera-hint">
-                    Você pode tirar uma foto para conferir o medidor.
+                    Fotografe o medidor para tentar reconhecer a leitura automaticamente.
                   </span>
                 </div>
               </section>
@@ -518,7 +551,6 @@ function RegistrarConsumo() {
 
                   <div>
                     <strong>Valor da energia</strong>
-
                     <span>Confira o valor antes de registrar.</span>
                   </div>
                 </div>
@@ -546,7 +578,6 @@ function RegistrarConsumo() {
                   <div className="calculation">
                     <div>
                       <span>Consumo</span>
-
                       <strong>{consumoCalculado.toFixed(2)} kWh</strong>
                     </div>
 
@@ -583,7 +614,6 @@ function RegistrarConsumo() {
               <div className="history-heading">
                 <div>
                   <span className="consumo-eyebrow">REGISTROS</span>
-
                   <h2>Histórico</h2>
                 </div>
 
@@ -612,9 +642,7 @@ function RegistrarConsumo() {
               {historico.length === 0 ? (
                 <div className="empty-history">
                   <div className="empty-history-icon">⚡</div>
-
                   <h3>Nenhum consumo registrado</h3>
-
                   <p>Os registros feitos aparecerão aqui.</p>
                 </div>
               ) : (
@@ -665,6 +693,14 @@ function RegistrarConsumo() {
           </>
         )}
       </main>
+
+      {/* LEITOR DA CÂMERA */}
+      {abrirLeitor && (
+        <LeitorMedidor
+          onFechar={() => setAbrirLeitor(false)}
+          onConfirmar={confirmarLeitura}
+        />
+      )}
 
       {/* CONFIRMAÇÃO DE EXCLUSÃO */}
       {confirmarExclusao && (
