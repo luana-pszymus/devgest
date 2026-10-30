@@ -63,6 +63,10 @@ const Consumo = database.define(
       type: Sequelize.DECIMAL(10, 2),
       allowNull: false,
     },
+    foto_url: {
+      type: Sequelize.STRING(255),
+      allowNull: true,
+    },
   },
   {
     tableName: "consumo",
