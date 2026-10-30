@@ -11,39 +11,47 @@ const transporter = nodemailer.createTransport({
 });
 
 // LOGIN
+
 exports.login = async (req, res) => {
   try {
     const { email, senha } = req.body;
 
-    // VALIDAR CAMPOS
     if (!email || !senha) {
       return res.status(400).json({
         erro: "E-mail e senha são obrigatórios",
       });
     }
 
-    // BUSCAR USUÁRIO PELO E-MAIL
+    // Normalizar e-mail
+    const emailNormalizado = email.trim().toLowerCase();
+
     const usuario = await Usuario.findOne({
       where: {
-        email: email,
+        email: emailNormalizado,
       },
     });
 
-    // VERIFICAR SE USUÁRIO EXISTE
+    // Diagnóstico: usuário não encontrado
     if (!usuario) {
+      console.log("LOGIN: usuário não encontrado:", emailNormalizado);
+
       return res.status(401).json({
         erro: "E-mail ou senha inválidos",
       });
     }
 
-    // VERIFICAR SENHA
+    // Diagnóstico: senha incorreta
     if (usuario.senha !== senha) {
+      console.log("LOGIN: senha não corresponde.");
+      console.log("Tamanho da senha recebida:", senha.length);
+      console.log("Tamanho da senha cadastrada:", usuario.senha?.length);
+
       return res.status(401).json({
         erro: "E-mail ou senha inválidos",
       });
     }
 
-    // GERAR TOKEN JWT
+    // Gerar JWT
     const token = jwt.sign(
       {
         id: usuario.id,
@@ -55,12 +63,9 @@ exports.login = async (req, res) => {
       },
     );
 
-    // LOGIN REALIZADO
-    res.status(200).json({
+    return res.status(200).json({
       mensagem: "Login realizado com sucesso",
-
       token,
-
       usuario: {
         id: usuario.id,
         nome: usuario.nome,
@@ -68,9 +73,9 @@ exports.login = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error(error);
+    console.error("Erro no login:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       erro: "Erro ao realizar login",
       detalhes: error.message,
     });
@@ -130,6 +135,7 @@ exports.enviarCodigo = async (req, res) => {
 };
 
 // VERIFICAR CÓDIGO
+
 exports.verificarCodigo = async (req, res) => {
   try {
     const { email, codigo } = req.body;
@@ -141,9 +147,7 @@ exports.verificarCodigo = async (req, res) => {
     }
 
     const usuario = await Usuario.findOne({
-      where: {
-        email,
-      },
+      where: { email },
     });
 
     if (!usuario) {
@@ -152,25 +156,46 @@ exports.verificarCodigo = async (req, res) => {
       });
     }
 
-    if (usuario.codigo_verificacao !== codigo.toString()) {
+    if (
+      !usuario.codigo_verificacao ||
+      usuario.codigo_verificacao !== codigo.toString()
+    ) {
       return res.status(401).json({
         erro: "Código inválido",
       });
     }
 
-    if (!usuario.codigo_expira || new Date() > usuario.codigo_expira) {
+    if (
+      !usuario.codigo_expira ||
+      new Date() > new Date(usuario.codigo_expira)
+    ) {
       return res.status(401).json({
         erro: "Código expirado",
       });
     }
 
+    // Limpar o código após a validação
     await usuario.update({
       codigo_verificacao: null,
       codigo_expira: null,
     });
 
-    res.status(200).json({
+    // Gerar token JWT
+    const token = jwt.sign(
+      {
+        id: usuario.id,
+        email: usuario.email,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "2h",
+      },
+    );
+
+    // Retornar token e dados do usuário
+    return res.status(200).json({
       mensagem: "Autenticação realizada com sucesso",
+      token,
       usuario: {
         id: usuario.id,
         nome: usuario.nome,
@@ -178,9 +203,9 @@ exports.verificarCodigo = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error(error);
+    console.error("Erro ao verificar código:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       erro: "Erro ao verificar código",
       detalhes: error.message,
     });

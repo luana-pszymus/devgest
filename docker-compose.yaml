@@ -29,6 +29,8 @@ services:
     container_name: gestdev-back
     ports:
       - "3000:3000"
+    env_file:
+      - ./back/.env
     depends_on:
       postgres_local:
         condition: service_healthy
