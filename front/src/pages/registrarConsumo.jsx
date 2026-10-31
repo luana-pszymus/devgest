@@ -62,6 +62,7 @@ function RegistrarConsumo() {
   const [erro, setErro] = useState("");
   const [apagando, setApagando] = useState(null);
   const [confirmarExclusao, setConfirmarExclusao] = useState(null);
+  const [fotoAmpliada, setFotoAmpliada] = useState(null);
 
   useEffect(() => {
     carregarDados();
@@ -650,6 +651,20 @@ function RegistrarConsumo() {
                   {historico.map((consumo) => (
                     <article className="history-card" key={consumo.id}>
                       <div className="history-main">
+                        {consumo.foto_url && (
+  <button
+    type="button"
+    className="history-photo-button"
+    onClick={() => setFotoAmpliada(consumo.foto_url)}
+    title="Ampliar foto do medidor"
+  >
+    <img
+      src={consumo.foto_url}
+      alt={`Medidor de ${nomeDoMes(consumo.mes)} ${consumo.ano}`}
+      className="history-photo"
+    />
+  </button>
+)}
                         <div className="history-icon">⚡</div>
 
                         <div>
@@ -695,6 +710,34 @@ function RegistrarConsumo() {
       </main>
 
       {/* LEITOR DA CÂMERA */}
+            {/* FOTO AMPLIADA DO HISTÓRICO */}
+      {fotoAmpliada && (
+        <div
+          className="history-photo-overlay"
+          onClick={() => setFotoAmpliada(null)}
+        >
+          <div
+            className="history-photo-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="history-photo-close"
+              onClick={() => setFotoAmpliada(null)}
+              aria-label="Fechar foto"
+            >
+              ✕
+            </button>
+
+            <img
+              src={fotoAmpliada}
+              alt="Foto do medidor de energia"
+            />
+
+            <p>Foto do medidor</p>
+          </div>
+        </div>
+      )}
       {abrirLeitor && (
         <LeitorMedidor
           onFechar={() => setAbrirLeitor(false)}
