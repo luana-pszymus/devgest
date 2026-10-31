@@ -159,3 +159,29 @@
     padding: 17px;
   }
 }
+
+.leitor-permissao {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  min-height: 260px;
+  padding: 24px;
+  text-align: center;
+}
+
+.leitor-permissao > span {
+  font-size: 48px;
+}
+
+.leitor-permissao p {
+  margin: 0;
+  color: #524837;
+  line-height: 1.5;
+}
+
+.leitor-permissao button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

@@ -8,6 +8,7 @@ export default function LeitorMedidor({ onFechar, onConfirmar }) {
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
 
+  const [permissao, setPermissao] = useState("aguardando");
   const [arquivo, setArquivo] = useState(null);
   const [imagem, setImagem] = useState("");
   const [leitura, setLeitura] = useState("");
@@ -15,49 +16,73 @@ export default function LeitorMedidor({ onFechar, onConfirmar }) {
   const [erro, setErro] = useState("");
   const [mensagem, setMensagem] = useState("");
 
-  // Abre a câmera traseira do celular.
-  useEffect(() => {
-    let ativo = true;
+  // Para a câmera quando o componente for fechado.
+  function pararCamera() {
+    streamRef.current?.getTracks().forEach((track) => track.stop());
+    streamRef.current = null;
+  }
 
-    async function iniciarCamera() {
-      try {
-        if (!navigator.mediaDevices?.getUserMedia) {
-          throw new Error("Câmera não disponível neste navegador.");
-        }
+  // Solicita a permissão e abre a câmera.
+  async function solicitarPermissao() {
+    setErro("");
+    setMensagem("");
+    setPermissao("solicitando");
 
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: { ideal: "environment" },
-          },
-          audio: false,
-        });
-
-        if (!ativo) {
-          stream.getTracks().forEach((track) => track.stop());
-          return;
-        }
-
-        streamRef.current = stream;
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-      } catch (error) {
-        console.error("Erro ao abrir câmera:", error);
-        setErro("Não foi possível abrir a câmera. Verifique a permissão do navegador.");
+    try {
+      if (!navigator.mediaDevices?.getUserMedia) {
+        throw new Error(
+          "Câmera indisponível. Abra o sistema em uma conexão HTTPS."
+        );
       }
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: { ideal: "environment" },
+        },
+        audio: false,
+      });
+
+      streamRef.current = stream;
+
+      if (!videoRef.current) {
+        throw new Error("Não foi possível preparar a câmera.");
+      }
+
+      videoRef.current.srcObject = stream;
+      await videoRef.current.play();
+
+      setPermissao("autorizada");
+      setMensagem("Câmera autorizada! Posicione o medidor na área indicada.");
+    } catch (error) {
+      console.error("Erro ao abrir câmera:", error);
+
+      setPermissao("bloqueada");
+
+      if (error.name === "NotAllowedError" ||
+          error.name === "PermissionDeniedError") {
+        setErro(
+          "O acesso à câmera foi bloqueado. Libere a permissão nas configurações do navegador e tente novamente."
+        );
+      } else if (error.name === "NotFoundError") {
+        setErro("Nenhuma câmera foi encontrada neste dispositivo.");
+      } else {
+        setErro(error.message || "Não foi possível abrir a câmera.");
+      }
+
+      pararCamera();
     }
+  }
 
-    iniciarCamera();
-
+  // Encerra a câmera e libera a imagem temporária ao fechar.
+  useEffect(() => {
     return () => {
-      ativo = false;
-
-      streamRef.current?.getTracks().forEach((track) => track.stop());
+      pararCamera();
 
       if (imagem) {
         URL.revokeObjectURL(imagem);
       }
     };
-  }, []);
+  }, [imagem]);
 
   // Fotografa o medidor.
   function tirarFoto() {
@@ -75,28 +100,26 @@ export default function LeitorMedidor({ onFechar, onConfirmar }) {
     const contexto = canvas.getContext("2d");
     contexto.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    canvas.toBlob(
-      (blob) => {
-        if (!blob) {
-          setErro("Não foi possível capturar a foto.");
-          return;
-        }
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        setErro("Não foi possível capturar a foto.");
+        return;
+      }
 
-        const novaFoto = new File([blob], "medidor.jpg", {
-          type: "image/jpeg",
-        });
+      const novaFoto = new File([blob], "medidor.jpg", {
+        type: "image/jpeg",
+      });
 
-        if (imagem) URL.revokeObjectURL(imagem);
+      const novaImagem = URL.createObjectURL(novaFoto);
 
-        setArquivo(novaFoto);
-        setImagem(URL.createObjectURL(novaFoto));
-        setLeitura("");
-        setErro("");
-        setMensagem("");
-      },
-      "image/jpeg",
-      0.9
-    );
+      setArquivo(novaFoto);
+      setImagem(novaImagem);
+      setLeitura("");
+      setErro("");
+      setMensagem("");
+
+      pararCamera();
+    }, "image/jpeg", 0.9);
   }
 
   // Reconhece os números da foto.
@@ -121,13 +144,11 @@ export default function LeitorMedidor({ onFechar, onConfirmar }) {
       });
 
       const resultado = await worker.recognize(arquivo);
-
-      const numeros =
-        resultado.data.text.match(/\d+(?:[.,]\d+)?/g) || [];
+      const numeros = resultado.data.text.match(/\d+(?:[.,]\d+)?/g) || [];
 
       if (numeros.length === 0) {
         setLeitura("");
-        setErro("Não consegui reconhecer os números. Você pode digitá-los manualmente.");
+        setErro("Não consegui reconhecer os números. Digite-os manualmente.");
         setMensagem("");
         return;
       }
@@ -144,9 +165,21 @@ export default function LeitorMedidor({ onFechar, onConfirmar }) {
       setMensagem("");
     } finally {
       if (worker) await worker.terminate();
-
       setProcessando(false);
     }
+  }
+
+  // Permite tirar outra foto.
+  async function tirarOutraFoto() {
+    if (imagem) URL.revokeObjectURL(imagem);
+
+    setImagem("");
+    setArquivo(null);
+    setLeitura("");
+    setErro("");
+    setMensagem("");
+
+    await solicitarPermissao();
   }
 
   // Envia a foto e a leitura para o formulário.
@@ -182,18 +215,34 @@ export default function LeitorMedidor({ onFechar, onConfirmar }) {
         </header>
 
         <p className="leitor-instrucao">
-          Posicione os números do medidor dentro da área indicada.
-          Evite reflexos e mantenha o celular firme.
+          Vamos utilizar a câmera para fotografar o medidor e reconhecer
+          os números da leitura.
         </p>
 
         <div className="leitor-camera">
           {imagem ? (
             <img src={imagem} alt="Foto do medidor" />
-          ) : (
+          ) : permissao === "autorizada" ? (
             <>
               <video ref={videoRef} autoPlay playsInline muted />
               <div className="leitor-guia" />
             </>
+          ) : (
+            <div className="leitor-permissao">
+              <span>📷</span>
+              <p>Precisamos da sua autorização para acessar a câmera.</p>
+
+              <button
+                type="button"
+                className="leitor-principal"
+                onClick={solicitarPermissao}
+                disabled={permissao === "solicitando"}
+              >
+                {permissao === "solicitando"
+                  ? "Solicitando permissão..."
+                  : "Permitir acesso à câmera"}
+              </button>
+            </div>
           )}
         </div>
 
@@ -201,6 +250,14 @@ export default function LeitorMedidor({ onFechar, onConfirmar }) {
 
         {erro && <p className="leitor-erro">{erro}</p>}
         {mensagem && <p className="leitor-mensagem">{mensagem}</p>}
+
+        {permissao === "bloqueada" && (
+          <p className="leitor-instrucao">
+            Se você já bloqueou o acesso, clique no ícone de configurações
+            ou cadeado ao lado do endereço do site, permita o uso da câmera
+            e tente novamente.
+          </p>
+        )}
 
         {arquivo && (
           <div className="leitor-resultado">
@@ -220,7 +277,7 @@ export default function LeitorMedidor({ onFechar, onConfirmar }) {
         )}
 
         <div className="leitor-acoes">
-          {!imagem ? (
+          {!imagem && permissao === "autorizada" && (
             <button
               type="button"
               className="leitor-principal"
@@ -228,19 +285,15 @@ export default function LeitorMedidor({ onFechar, onConfirmar }) {
             >
               📷 Tirar foto
             </button>
-          ) : (
+          )}
+
+          {imagem && (
             <>
               <button
                 type="button"
                 className="leitor-secundario"
-                onClick={() => {
-                  URL.revokeObjectURL(imagem);
-                  setImagem("");
-                  setArquivo(null);
-                  setLeitura("");
-                  setMensagem("");
-                  setErro("");
-                }}
+                onClick={tirarOutraFoto}
+                disabled={processando}
               >
                 Tirar outra foto
               </button>
