@@ -1,0 +1,161 @@
+
+.leitor-fundo {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.65);
+  overflow-y: auto;
+}
+
+.leitor-modal {
+  width: 100%;
+  max-width: 480px;
+  padding: 22px;
+  border-radius: 18px;
+  background: #fff;
+  color: #33312c;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.2);
+}
+
+.leitor-cabecalho {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.leitor-cabecalho span {
+  color: #4a80b7;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.leitor-cabecalho h2 {
+  margin: 5px 0 0;
+  font-size: 22px;
+}
+
+.leitor-cabecalho button {
+  border: 0;
+  background: transparent;
+  color: #414952;
+  font-size: 30px;
+  cursor: pointer;
+}
+
+.leitor-instrucao {
+  color: #666;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.leitor-camera {
+  position: relative;
+  width: 100%;
+  min-height: 220px;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #222;
+}
+
+.leitor-camera video,
+.leitor-camera img {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+  object-fit: contain;
+}
+
+.leitor-guia {
+  position: absolute;
+  left: 10%;
+  top: 35%;
+  width: 80%;
+  height: 30%;
+  border: 2px solid #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 0 999px rgba(0, 0, 0, 0.18);
+  pointer-events: none;
+}
+
+.leitor-erro,
+.leitor-mensagem {
+  margin: 12px 0;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.leitor-erro {
+  color: #b54a4a;
+}
+
+.leitor-mensagem {
+  color: #39734a;
+}
+
+.leitor-resultado {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 18px 0;
+}
+
+.leitor-resultado label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.leitor-resultado input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 13px;
+  border: 1px solid #ccc;
+  border-radius: 9px;
+  font-size: 22px;
+  text-align: center;
+}
+
+.leitor-acoes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.leitor-acoes button {
+  width: 100%;
+  padding: 13px;
+  border: 0;
+  border-radius: 9px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.leitor-principal {
+  background: #4a80b7;
+  color: #fff;
+}
+
+.leitor-secundario {
+  background: #414952;
+  color: #fff;
+}
+
+.leitor-acoes button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+  .leitor-modal {
+    padding: 17px;
+  }
+}
