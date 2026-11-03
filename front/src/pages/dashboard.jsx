@@ -3,13 +3,12 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import Navbar from "../components/Navbar";
-import Botao from "../components/Botao";
-import Loading from "../components/Loading";
 
 import CabecalhoDashboard from "./CabecalhoDashboard";
 import ResumoDashboard from "./ResumoDashboard";
 import SecaoKitnets from "./SecaoKitnets";
 import FormularioKitnet from "./FormularioKitnet";
+import EstadoDashboard from "./EstadoDashboard";
 
 import api from "../services/api";
 import "./dashboard.css";
@@ -58,14 +57,12 @@ export default function Dashboard() {
 
   const navigate = useNavigate();
 
-  // Carrega os dados assim que o Dashboard abre.
   useEffect(() => {
     carregarDados();
   }, []);
 
   // ==================== DADOS DA API ====================
 
-  // Busca tudo que o Dashboard precisa de uma vez.
   async function carregarDados() {
     try {
       setCarregando(true);
@@ -107,11 +104,7 @@ export default function Dashboard() {
           : [],
       );
     } catch (error) {
-      console.error(
-        "Erro ao carregar Dashboard:",
-        error,
-      );
-
+      console.error("Erro ao carregar Dashboard:", error);
       setErro("Não foi possível carregar os dados.");
     } finally {
       setCarregando(false);
@@ -120,7 +113,6 @@ export default function Dashboard() {
 
   // ==================== RELACIONAMENTOS ====================
 
-  // Encontra somente o contrato que ainda está ativo.
   function encontrarContrato(kitnetId) {
     return contratos.find(
       (contrato) =>
@@ -129,7 +121,6 @@ export default function Dashboard() {
     );
   }
 
-  // Encontra o inquilino ligado ao contrato.
   function encontrarInquilino(contrato) {
     if (!contrato) {
       return null;
@@ -142,7 +133,6 @@ export default function Dashboard() {
     );
   }
 
-  // Pega o consumo mais recente daquele contrato.
   function encontrarUltimoConsumo(contratoId) {
     const registros = consumos
       .filter(
@@ -187,7 +177,6 @@ export default function Dashboard() {
     setErroKitnet("");
   }
 
-  // Cadastra uma nova kitnet no backend.
   async function cadastrarKitnet(event) {
     event.preventDefault();
 
@@ -197,7 +186,6 @@ export default function Dashboard() {
     const numero = numeroKitnet.trim();
     const valor = Number(valorAluguel);
 
-    // Validação básica antes de enviar.
     if (!numero) {
       setErroKitnet("Informe o número da kitnet.");
       return;
@@ -208,7 +196,6 @@ export default function Dashboard() {
       return;
     }
 
-    // Evita cadastrar duas kitnets com o mesmo número.
     const numeroJaExiste = kitnets.some(
       (kitnet) =>
         String(kitnet.numero)
@@ -234,7 +221,6 @@ export default function Dashboard() {
       setNumeroKitnet("");
       setValorAluguel("");
 
-      // Atualiza a lista depois do cadastro.
       await carregarDados();
 
       setTimeout(() => {
@@ -242,10 +228,7 @@ export default function Dashboard() {
         setMensagemKitnet("");
       }, 700);
     } catch (error) {
-      console.error(
-        "Erro ao cadastrar kitnet:",
-        error,
-      );
+      console.error("Erro ao cadastrar kitnet:", error);
 
       setErroKitnet(
         error.response?.data?.erro ||
@@ -306,7 +289,6 @@ export default function Dashboard() {
   return (
     <div className="dashboard">
       <main className="dashboard-content">
-        {/* Cabeçalho principal */}
         <CabecalhoDashboard
           mes={MESES[mesAtual - 1]}
           ano={anoAtual}
@@ -314,31 +296,14 @@ export default function Dashboard() {
           onSair={handleLogout}
         />
 
-        {/* Erro geral de carregamento */}
-        {erro && (
-          <div className="dashboard-error">
-            <strong>
-              Não foi possível carregar os dados.
-            </strong>
+        <EstadoDashboard
+          carregando={carregando}
+          erro={erro}
+          onTentarNovamente={carregarDados}
+        />
 
-            <Botao onClick={carregarDados}>
-              Tentar novamente
-            </Botao>
-          </div>
-        )}
-
-        {carregando ? (
-          // Enquanto a API não responde, mostramos o carregamento.
-          <div className="dashboard-loading">
-            <div className="loading-circle"></div>
-
-            <Loading>
-              Carregando seus dados...
-            </Loading>
-          </div>
-        ) : (
+        {!carregando && (
           <>
-            {/* Resumo com os principais números */}
             <ResumoDashboard
               valorAlugueis={valorAlugueis}
               totalKitnets={totalKitnets}
@@ -347,7 +312,6 @@ export default function Dashboard() {
               valorEnergiaMes={valorEnergiaMes}
             />
 
-            {/* Lista de imóveis */}
             <SecaoKitnets
               kitnets={kitnets}
               encontrarContrato={encontrarContrato}
@@ -359,7 +323,6 @@ export default function Dashboard() {
         )}
       </main>
 
-      {/* Formulário de cadastro de kitnet */}
       <FormularioKitnet
         aberto={mostrarFormulario}
         onFechar={fecharFormularioKitnet}
