@@ -6,6 +6,7 @@ import Botao from "../components/Botao";
 import Loading from "../components/Loading";
 import Mensagem from "../components/Mensagem";
 
+import CabecalhoDashboard from "./CabecalhoDashboard";
 import ResumoDashboard from "./ResumoDashboard";
 import KitnetCard from "./KitnetCard";
 import FormularioKitnet from "./FormularioKitnet";
@@ -27,7 +28,6 @@ const MESES = [
   "Novembro",
   "Dezembro",
 ];
-
 
 export default function Dashboard() {
   // ==================== DADOS ====================
@@ -324,36 +324,12 @@ export default function Dashboard() {
     <div className="dashboard">
       <main className="dashboard-content">
         {/* Cabeçalho principal */}
-        <header className="dashboard-header">
-          <div>
-            <span className="dashboard-eyebrow">
-              GESTÃO DE KITNETS
-            </span>
-
-            <h1>Visão geral</h1>
-
-            <p>
-              {MESES[mesAtual - 1]} de {anoAtual}
-            </p>
-          </div>
-
-          <div className="dashboard-header-actions">
-            <Botao
-              onClick={carregarDados}
-              title="Atualizar dados"
-              aria-label="Atualizar dados"
-            >
-              ↻
-            </Botao>
-
-            <Botao
-              tipo="cancelar"
-              onClick={handleLogout}
-            >
-              Sair
-            </Botao>
-          </div>
-        </header>
+        <CabecalhoDashboard
+          mes={MESES[mesAtual - 1]}
+          ano={anoAtual}
+          onAtualizar={carregarDados}
+          onSair={handleLogout}
+        />
 
         {/* Erro geral de carregamento */}
         {erro && (
