@@ -1,5 +1,7 @@
+
 import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
+import FormularioInquilino from "./FormularioInquilino";
 import api from "../services/api";
 import "./inquilinos.css";
 
@@ -43,7 +45,7 @@ function Inquilinos() {
     carregarDados();
   }, []);
 
-  // Busca todos os dados necessários para a tela.
+  // Busca os dados necessários para a tela.
   async function carregarDados() {
     try {
       setCarregando(true);
@@ -62,9 +64,7 @@ function Inquilinos() {
       );
 
       setResumo(Array.isArray(resumoRes.data) ? resumoRes.data : []);
-
       setKitnets(Array.isArray(kitnetsRes.data) ? kitnetsRes.data : []);
-
       setContratos(Array.isArray(contratosRes.data) ? contratosRes.data : []);
     } catch (error) {
       console.error(error);
@@ -85,8 +85,8 @@ function Inquilinos() {
     );
   }
 
-  // Retorna somente as kitnets disponíveis.
-  // Na edição, mantém também a kitnet atual do inquilino.
+  // Retorna as kitnets disponíveis.
+  // Na edição, mantém a kitnet atual do inquilino.
   function kitnetsDisponiveis() {
     const contratoAtual = editando
       ? resumo.find((item) => Number(item.inquilino_id) === Number(editando.id))
@@ -96,7 +96,6 @@ function Inquilinos() {
 
     return kitnets.filter((kitnet) => {
       const ocupada = kitnetEstaOcupada(kitnet.id);
-
       const eAtual = Number(kitnet.id) === Number(kitnetAtualId);
 
       return !ocupada || eAtual;
@@ -128,7 +127,6 @@ function Inquilinos() {
     setNome(inquilino.nome || "");
     setTelefone(inquilino.telefone || "");
     setEmail(inquilino.email || "");
-
     setKitnetId(dados?.kitnet_id ? String(dados.kitnet_id) : "");
 
     setErro("");
@@ -176,13 +174,11 @@ function Inquilinos() {
       };
 
       if (editando) {
-        // Primeiro atualiza os dados pessoais.
         await api.put(`/api/inquilino/${editando.id}`, dadosInquilino);
 
         const dadosContrato = pegarResumo(editando.id);
 
         if (dadosContrato?.contrato_id) {
-          // Atualiza a kitnet do contrato.
           await api.put(`/api/contratos/${dadosContrato.contrato_id}`, {
             inquilinoId: editando.id,
             kitnetId: Number(kitnetId),
@@ -190,8 +186,6 @@ function Inquilinos() {
             dataFim: dadosContrato.data_fim || null,
           });
         } else {
-          // Caso o inquilino não tenha contrato,
-          // cria um novo contrato.
           await api.post("/api/contratos/", {
             inquilinoId: editando.id,
             kitnetId: Number(kitnetId),
@@ -202,13 +196,9 @@ function Inquilinos() {
 
         setMensagem("Inquilino atualizado com sucesso!");
       } else {
-        // Primeiro cria o inquilino.
         const resposta = await api.post("/api/inquilino/", dadosInquilino);
-
         const novoInquilino = resposta.data;
 
-        // Depois cria o contrato ligando
-        // o novo inquilino à kitnet.
         await api.post("/api/contratos/", {
           inquilinoId: novoInquilino.id,
           kitnetId: Number(kitnetId),
@@ -301,10 +291,12 @@ function Inquilinos() {
     }
   }
 
-  // Pega as informações extras do inquilino.
+  // Busca as informações extras do inquilino.
   function pegarResumo(id) {
     return resumo.find((item) => Number(item.inquilino_id) === Number(id));
   }
+
+  const opcoesKitnet = kitnetsDisponiveis();
 
   return (
     <div className="app-container">
@@ -313,9 +305,7 @@ function Inquilinos() {
         <header className="tenant-header">
           <div>
             <span className="tenant-eyebrow">GESTÃO</span>
-
             <h1 className="page-title">Inquilinos</h1>
-
             <p className="page-subtitle">
               Pessoas cadastradas e seus contratos.
             </p>
@@ -331,112 +321,23 @@ function Inquilinos() {
 
         {mensagem && <div className="tenant-message success">✓ {mensagem}</div>}
 
-        {/* Formulário */}
+        {/* Formulário separado */}
         {mostrarForm && (
-          <section className="tenant-form card">
-            <div className="form-top">
-              <div>
-                <span className="form-label-small">
-                  {editando ? "EDITAR" : "NOVO CADASTRO"}
-                </span>
-
-                <h2>{editando ? "Editar inquilino" : "Novo inquilino"}</h2>
-              </div>
-
-              <button
-                type="button"
-                className="close-button"
-                onClick={fecharForm}
-              >
-                ×
-              </button>
-            </div>
-
-            <form onSubmit={salvarInquilino}>
-              <div className="form-group">
-                <label className="form-label">Nome</label>
-
-                <input
-                  className="form-input"
-                  type="text"
-                  value={nome}
-                  onChange={(e) => setNome(e.target.value)}
-                  placeholder="Nome completo"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Telefone</label>
-
-                <input
-                  className="form-input"
-                  type="tel"
-                  value={telefone}
-                  onChange={(e) => setTelefone(e.target.value)}
-                  placeholder="(42) 99999-9999"
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">E-mail</label>
-
-                <input
-                  className="form-input"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="email@exemplo.com"
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Kitnet</label>
-
-                <select
-                  className="form-input"
-                  value={kitnetId}
-                  onChange={(e) => setKitnetId(e.target.value)}
-                  required
-                >
-                  <option value="">Selecione uma kitnet</option>
-
-                  {kitnetsDisponiveis().map((kitnet) => (
-                    <option key={kitnet.id} value={kitnet.id}>
-                      Kitnet {kitnet.numero}
-                      {" — "}
-                      {formatarMoeda(kitnet.valor_aluguel)}
-                    </option>
-                  ))}
-                </select>
-
-                {kitnetsDisponiveis().length === 0 && (
-                  <span
-                    style={{
-                      display: "block",
-                      marginTop: "6px",
-                      fontSize: "11px",
-                      color: "#856c3e",
-                    }}
-                  >
-                    Não há kitnets disponíveis.
-                  </span>
-                )}
-              </div>
-
-              <button
-                className="btn btn-primary"
-                type="submit"
-                disabled={salvando || kitnetsDisponiveis().length === 0}
-              >
-                {salvando
-                  ? "Salvando..."
-                  : editando
-                    ? "Salvar alterações"
-                    : "Cadastrar inquilino"}
-              </button>
-            </form>
-          </section>
+          <FormularioInquilino
+            editando={editando}
+            nome={nome}
+            setNome={setNome}
+            telefone={telefone}
+            setTelefone={setTelefone}
+            email={email}
+            setEmail={setEmail}
+            kitnetId={kitnetId}
+            setKitnetId={setKitnetId}
+            kitnetsDisponiveis={opcoesKitnet}
+            salvando={salvando}
+            onSalvar={salvarInquilino}
+            onFechar={fecharForm}
+          />
         )}
 
         {/* Lista */}
@@ -447,16 +348,13 @@ function Inquilinos() {
         ) : inquilinos.length === 0 ? (
           <div className="tenant-empty card">
             <div className="empty-icon">👤</div>
-
             <strong>Nenhum inquilino cadastrado</strong>
-
             <span>Use o botão + para cadastrar o primeiro.</span>
           </div>
         ) : (
           <>
             <div className="tenant-count">
               <strong>{inquilinos.length}</strong>
-
               <span>
                 {inquilinos.length === 1
                   ? " inquilino cadastrado"
@@ -467,7 +365,6 @@ function Inquilinos() {
             <section className="tenant-list">
               {inquilinos.map((inquilino) => {
                 const dados = pegarResumo(inquilino.id);
-
                 const ativo = dados?.data_fim == null;
 
                 return (
@@ -494,7 +391,6 @@ function Inquilinos() {
                       {dados?.kitnet_numero && (
                         <div className="info-line">
                           <span>🏠</span>
-
                           <strong>Kitnet {dados.kitnet_numero}</strong>
                         </div>
                       )}
@@ -502,7 +398,6 @@ function Inquilinos() {
                       {inquilino.telefone && (
                         <div className="info-line">
                           <span>📞</span>
-
                           <span>{inquilino.telefone}</span>
                         </div>
                       )}
@@ -510,7 +405,6 @@ function Inquilinos() {
                       {inquilino.email && (
                         <div className="info-line">
                           <span>✉️</span>
-
                           <span>{inquilino.email}</span>
                         </div>
                       )}
@@ -520,13 +414,11 @@ function Inquilinos() {
                       <div className="last-consumption">
                         <div>
                           <span>Último consumo</span>
-
                           <strong>{dados.consumo.consumo_kwh} kWh</strong>
                         </div>
 
                         <div>
                           <span>Energia</span>
-
                           <strong>
                             {formatarMoeda(dados.consumo.valor_energia)}
                           </strong>
@@ -569,7 +461,6 @@ function Inquilinos() {
 
                 <div>
                   <span className="tenant-eyebrow">INQUILINO</span>
-
                   <h2>{selecionado.nome}</h2>
                 </div>
               </div>
@@ -585,7 +476,6 @@ function Inquilinos() {
 
             {(() => {
               const dados = pegarResumo(selecionado.id);
-
               const ativo = dados?.data_fim == null;
 
               return (
@@ -595,13 +485,11 @@ function Inquilinos() {
 
                     <div className="detail-line">
                       <span>Telefone</span>
-
                       <strong>{selecionado.telefone || "Não informado"}</strong>
                     </div>
 
                     <div className="detail-line">
                       <span>E-mail</span>
-
                       <strong>{selecionado.email || "Não informado"}</strong>
                     </div>
                   </div>
@@ -613,19 +501,16 @@ function Inquilinos() {
                       <>
                         <div className="detail-line">
                           <span>Kitnet</span>
-
                           <strong>Kitnet {dados.kitnet_numero}</strong>
                         </div>
 
                         <div className="detail-line">
                           <span>Início</span>
-
                           <strong>{formatarData(dados.data_inicio)}</strong>
                         </div>
 
                         <div className="detail-line">
                           <span>Fim</span>
-
                           <strong>
                             {dados.data_fim
                               ? formatarData(dados.data_fim)
@@ -636,7 +521,6 @@ function Inquilinos() {
                         {dados.consumo && (
                           <div className="detail-line">
                             <span>Último consumo</span>
-
                             <strong>{dados.consumo.consumo_kwh} kWh</strong>
                           </div>
                         )}
