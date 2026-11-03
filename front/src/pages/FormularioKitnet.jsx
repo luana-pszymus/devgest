@@ -2,6 +2,7 @@ import Botao from "../components/Botao";
 import Campo from "../components/Campo";
 import Mensagem from "../components/Mensagem";
 import Modal from "../components/Modal";
+import "./FormularioKitnet.css";
 
 // Formulário usado para cadastrar uma nova kitnet.
 function FormularioKitnet({

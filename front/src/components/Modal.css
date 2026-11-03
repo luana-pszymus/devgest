@@ -1,3 +1,7 @@
+/* =========================================
+   MODAL GENÉRICO
+   ========================================= */
+
 /* Fundo escuro atrás do modal */
 .modal-fundo {
   position: fixed;
@@ -6,18 +10,12 @@
   background: rgba(0, 0, 0, 0.45);
 
   display: flex;
-
-  /* Mantém o modal mais para cima da tela */
   align-items: flex-start;
-
   justify-content: center;
 
-  /* Espaço do topo + espaço lateral */
   padding: 70px 20px 20px;
 
   box-sizing: border-box;
-
-  /* Fica acima da Navbar */
   z-index: 2000;
 }
 
@@ -29,15 +27,10 @@
   max-height: calc(100vh - 90px);
 
   background: white;
-
   border-radius: 12px;
-
   padding: 20px;
 
   box-sizing: border-box;
-
-  /* Se o conteúdo ficar maior que a tela,
-     somente o conteúdo do modal rola */
   overflow-y: auto;
 }
 
@@ -48,7 +41,6 @@
   justify-content: space-between;
 
   gap: 15px;
-
   margin-bottom: 20px;
 }
 
@@ -57,7 +49,6 @@
   margin: 0;
 
   color: #33312c;
-
   font-size: 20px;
 }
 
@@ -66,7 +57,6 @@
   margin: 6px 0 0;
 
   color: #707780;
-
   font-size: 14px;
 }
 
@@ -77,11 +67,8 @@
   margin-bottom: 4px;
 
   color: #4a80b7;
-
   font-size: 11px;
-
   font-weight: 700;
-
   letter-spacing: 0.5px;
 }
 
@@ -90,27 +77,121 @@
   flex-shrink: 0;
 
   border: none;
-
   background: transparent;
 
   color: #414952;
-
   font-size: 24px;
-
   line-height: 1;
 
   cursor: pointer;
 }
 
-/* Estado quando o mouse passa no X */
 .modal-cabecalho button:hover {
   color: #33312c;
 }
 
-/* Evita aparência de botão ativo quando estiver bloqueado */
 .modal-cabecalho button:disabled {
-  
   cursor: not-allowed;
-
   opacity: 0.5;
+}
+
+/* =========================================
+   MODAL DE KITNET
+   ========================================= */
+
+.kitnet-modal-background {
+  position: fixed;
+  inset: 0;
+
+  /* O modal fica acima da Navbar */
+  z-index: 2000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+  box-sizing: border-box;
+
+  background: rgba(30, 35, 40, 0.42);
+}
+
+.kitnet-modal {
+  width: 100%;
+  max-width: 500px;
+
+  max-height: calc(100vh - 40px);
+
+  padding: 20px 16px;
+  box-sizing: border-box;
+
+  border-radius: 20px;
+
+  background: #ffffff;
+
+  box-shadow: 0 5px 25px rgba(30, 35, 40, 0.15);
+
+  /* Se a tela for pequena, o próprio modal pode rolar */
+  overflow-y: auto;
+}
+
+.kitnet-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+/* Texto acima do título do modal de kitnet */
+.kitnet-modal-header .modal-eyebrow {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #1976d2;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.kitnet-modal-header h2 {
+  margin: 0;
+
+  color: #33312c;
+  font-size: 19px;
+}
+
+.kitnet-modal-header p {
+  margin: 5px 0 0;
+
+  color: #68737d;
+  font-size: 12px;
+}
+
+/* Botão X do modal de kitnet */
+.close-modal-button {
+  width: 32px;
+  height: 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border: none;
+  border-radius: 9px;
+
+  background: #f1f3f5;
+
+  color: #68737d;
+  font-size: 22px;
+
+  cursor: pointer;
+}
+
+.close-modal-button:active {
+  transform: scale(0.95);
 }
