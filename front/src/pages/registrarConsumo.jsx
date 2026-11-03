@@ -1,4 +1,3 @@
-
 import { useEffect, useMemo, useState } from "react";
 import api from "../services/api";
 import Navbar from "../components/Navbar";
@@ -37,6 +36,7 @@ function RegistrarConsumo() {
   const [contratos, setContratos] = useState([]);
   const [inquilinos, setInquilinos] = useState([]);
   const [consumos, setConsumos] = useState([]);
+  const [kitnets, setKitnets] = useState([]);
 
   const [contratoId, setContratoId] = useState("");
   const [filtroInquilino, setFiltroInquilino] = useState("");
@@ -83,29 +83,32 @@ function RegistrarConsumo() {
       setCarregando(true);
       setErro("");
 
-      const [contratosResponse, inquilinosResponse, consumosResponse] =
-        await Promise.all([
-          api.get("/api/contratos"),
-          api.get("/api/inquilino/listar"),
-          api.get("/api/consumo/listar"),
-        ]);
+      const [
+        contratosResponse,
+        inquilinosResponse,
+        consumosResponse,
+        kitnetsResponse,
+      ] = await Promise.all([
+        api.get("/api/contratos"),
+        api.get("/api/inquilino/listar"),
+        api.get("/api/consumo/listar"),
+        api.get("/api/kitnet/listar"),
+      ]);
 
       setContratos(
-        Array.isArray(contratosResponse.data)
-          ? contratosResponse.data
-          : []
+        Array.isArray(contratosResponse.data) ? contratosResponse.data : [],
       );
 
       setInquilinos(
-        Array.isArray(inquilinosResponse.data)
-          ? inquilinosResponse.data
-          : []
+        Array.isArray(inquilinosResponse.data) ? inquilinosResponse.data : [],
       );
 
       setConsumos(
-        Array.isArray(consumosResponse.data)
-          ? consumosResponse.data
-          : []
+        Array.isArray(consumosResponse.data) ? consumosResponse.data : [],
+      );
+
+      setKitnets(
+        Array.isArray(kitnetsResponse.data) ? kitnetsResponse.data : [],
       );
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
@@ -113,6 +116,23 @@ function RegistrarConsumo() {
     } finally {
       setCarregando(false);
     }
+  }
+
+  function numeroDaKitnetPorId(kitnetId) {
+    const kitnet = kitnets.find((item) => Number(item.id) === Number(kitnetId));
+
+    return kitnet?.numero || kitnetId;
+  }
+
+  function valoresDoConsumo(consumo) {
+    const aluguel = Number(consumo.valor_aluguel || 0);
+    const energia = Number(consumo.valor_energia || 0);
+
+    return {
+      aluguel,
+      energia,
+      total: aluguel + energia,
+    };
   }
 
   // Escolhe a kitnet e encontra a última leitura dela.
@@ -138,9 +158,7 @@ function RegistrarConsumo() {
 
     const ultimoConsumo = registros[0];
 
-    setLeituraAnterior(
-      ultimoConsumo ? Number(ultimoConsumo.leitura_atual) : 0
-    );
+    setLeituraAnterior(ultimoConsumo ? Number(ultimoConsumo.leitura_atual) : 0);
   }
 
   // Recebe a foto e a leitura confirmada pelo leitor.
@@ -206,16 +224,11 @@ function RegistrarConsumo() {
         dados.append("foto", arquivoFoto);
       }
 
-      const response = await api.post(
-        "/api/consumo/registrar",
-        dados
-      );
+      const response = await api.post("/api/consumo/registrar", dados);
 
       await carregarDados();
 
-      setMensagem(
-        response.data?.mensagem || "Consumo registrado com sucesso!"
-      );
+      setMensagem(response.data?.mensagem || "Consumo registrado com sucesso!");
 
       setLeituraAnterior(Number(leituraAtual));
       setLeituraAtual("");
@@ -230,8 +243,7 @@ function RegistrarConsumo() {
       console.error("Erro ao registrar consumo:", error);
 
       setErro(
-        error.response?.data?.erro ||
-          "Não foi possível registrar o consumo."
+        error.response?.data?.erro || "Não foi possível registrar o consumo.",
       );
     } finally {
       setSalvando(false);
@@ -263,9 +275,7 @@ function RegistrarConsumo() {
 
       await api.delete(`/api/consumo/${id}`);
 
-      setConsumos((lista) =>
-        lista.filter((item) => item.id !== id)
-      );
+      setConsumos((lista) => lista.filter((item) => item.id !== id));
 
       setMensagem("Registro excluído com sucesso.");
       setConfirmarExclusao(null);
@@ -280,12 +290,12 @@ function RegistrarConsumo() {
   }
 
   const contratoSelecionado = contratos.find(
-    (contrato) => Number(contrato.id) === Number(contratoId)
+    (contrato) => Number(contrato.id) === Number(contratoId),
   );
 
   const inquilinoSelecionado = inquilinos.find(
     (inquilino) =>
-      Number(inquilino.id) === Number(contratoSelecionado?.inquilino_id)
+      Number(inquilino.id) === Number(contratoSelecionado?.inquilino_id),
   );
 
   // Filtra o histórico pelo inquilino escolhido.
@@ -296,12 +306,12 @@ function RegistrarConsumo() {
       const contratosDoInquilino = contratos
         .filter(
           (contrato) =>
-            Number(contrato.inquilino_id) === Number(filtroInquilino)
+            Number(contrato.inquilino_id) === Number(filtroInquilino),
         )
         .map((contrato) => Number(contrato.id));
 
       lista = lista.filter((consumo) =>
-        contratosDoInquilino.includes(Number(consumo.contrato_id))
+        contratosDoInquilino.includes(Number(consumo.contrato_id)),
       );
     }
 
@@ -331,11 +341,11 @@ function RegistrarConsumo() {
 
   function nomeDoInquilino(contratoIdDoHistorico) {
     const contrato = contratos.find(
-      (item) => Number(item.id) === Number(contratoIdDoHistorico)
+      (item) => Number(item.id) === Number(contratoIdDoHistorico),
     );
 
     const inquilino = inquilinos.find(
-      (item) => Number(item.id) === Number(contrato?.inquilino_id)
+      (item) => Number(item.id) === Number(contrato?.inquilino_id),
     );
 
     return inquilino?.nome || "Inquilino não identificado";
@@ -343,10 +353,12 @@ function RegistrarConsumo() {
 
   function numeroDaKitnet(contratoIdDoHistorico) {
     const contrato = contratos.find(
-      (item) => Number(item.id) === Number(contratoIdDoHistorico)
+      (item) => Number(item.id) === Number(contratoIdDoHistorico),
     );
 
-    return contrato?.kitnet_id || "-";
+    if (!contrato) return "-";
+
+    return numeroDaKitnetPorId(contrato.kitnet_id);
   }
 
   return (
@@ -423,7 +435,7 @@ function RegistrarConsumo() {
 
                   {contratos.map((contrato) => (
                     <option key={contrato.id} value={contrato.id}>
-                      Kitnet {contrato.kitnet_id}
+                      Kitnet {numeroDaKitnetPorId(contrato.kitnet_id)}
                     </option>
                   ))}
                 </select>
@@ -494,7 +506,9 @@ function RegistrarConsumo() {
 
                   <div>
                     <strong>Leitura do medidor</strong>
-                    <span>Digite ou fotografe o número mostrado no relógio.</span>
+                    <span>
+                      Digite ou fotografe o número mostrado no relógio.
+                    </span>
                   </div>
                 </div>
 
@@ -540,7 +554,8 @@ function RegistrarConsumo() {
                   </div>
 
                   <span className="camera-hint">
-                    Fotografe o medidor para tentar reconhecer a leitura automaticamente.
+                    Fotografe o medidor para tentar reconhecer a leitura
+                    automaticamente.
                   </span>
                 </div>
               </section>
@@ -652,19 +667,19 @@ function RegistrarConsumo() {
                     <article className="history-card" key={consumo.id}>
                       <div className="history-main">
                         {consumo.foto_url && (
-  <button
-    type="button"
-    className="history-photo-button"
-    onClick={() => setFotoAmpliada(consumo.foto_url)}
-    title="Ampliar foto do medidor"
-  >
-    <img
-      src={consumo.foto_url}
-      alt={`Medidor de ${nomeDoMes(consumo.mes)} ${consumo.ano}`}
-      className="history-photo"
-    />
-  </button>
-)}
+                          <button
+                            type="button"
+                            className="history-photo-button"
+                            onClick={() => setFotoAmpliada(consumo.foto_url)}
+                            title="Ampliar foto do medidor"
+                          >
+                            <img
+                              src={consumo.foto_url}
+                              alt={`Medidor de ${nomeDoMes(consumo.mes)} ${consumo.ano}`}
+                              className="history-photo"
+                            />
+                          </button>
+                        )}
                         <div className="history-icon">⚡</div>
 
                         <div>
@@ -682,12 +697,27 @@ function RegistrarConsumo() {
                       </div>
 
                       <div className="history-right">
-                        <div className="history-value">
-                          <span>Energia</span>
+                        <div className="history-values">
+                          <div className="history-value">
+                            <span>Aluguel</span>
+                            <strong>
+                              {formatarMoeda(consumo.valor_aluguel)}
+                            </strong>
+                          </div>
 
-                          <strong>
-                            {formatarMoeda(consumo.valor_energia)}
-                          </strong>
+                          <div className="history-value">
+                            <span>Energia</span>
+                            <strong>
+                              {formatarMoeda(consumo.valor_energia)}
+                            </strong>
+                          </div>
+
+                          <div className="history-value history-total">
+                            <span>Total</span>
+                            <strong>
+                              {formatarMoeda(valoresDoConsumo(consumo).total)}
+                            </strong>
+                          </div>
                         </div>
 
                         <button
@@ -710,7 +740,7 @@ function RegistrarConsumo() {
       </main>
 
       {/* LEITOR DA CÂMERA */}
-            {/* FOTO AMPLIADA DO HISTÓRICO */}
+      {/* FOTO AMPLIADA DO HISTÓRICO */}
       {fotoAmpliada && (
         <div
           className="history-photo-overlay"
@@ -729,10 +759,7 @@ function RegistrarConsumo() {
               ✕
             </button>
 
-            <img
-              src={fotoAmpliada}
-              alt="Foto do medidor de energia"
-            />
+            <img src={fotoAmpliada} alt="Foto do medidor de energia" />
 
             <p>Foto do medidor</p>
           </div>

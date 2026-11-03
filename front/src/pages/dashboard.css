@@ -1113,3 +1113,29 @@
     font-size: 9px;
   }
 }
+
+/* =========================================
+   TOTAL ALUGUEL + ENERGIA
+   ========================================= */
+
+.energy-total {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  margin-top: 12px;
+  padding-top: 10px;
+
+  border-top: 1px solid #d7e8fa;
+}
+
+.energy-total span {
+  color: #68737d;
+  font-size: 11px;
+}
+
+.energy-total strong {
+  color: #1976d2;
+  font-size: 16px;
+  font-weight: 800;
+}

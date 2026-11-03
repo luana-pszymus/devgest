@@ -134,8 +134,7 @@
 
   border-radius: 14px;
 
-  box-shadow:
-    0 2px 10px rgba(65, 73, 82, 0.05);
+  box-shadow: 0 2px 10px rgba(65, 73, 82, 0.05);
 }
 
 .energy-reading-section {
@@ -243,8 +242,7 @@
 .field-control:focus {
   border-color: var(--energia-amarelo);
 
-  box-shadow:
-    0 0 0 3px rgba(183, 135, 49, 0.1);
+  box-shadow: 0 0 0 3px rgba(183, 135, 49, 0.1);
 }
 
 .field-control::placeholder {
@@ -395,8 +393,7 @@
 
   background: var(--energia-branco);
 
-  box-shadow:
-    0 0 0 3px rgba(183, 135, 49, 0.07);
+  box-shadow: 0 0 0 3px rgba(183, 135, 49, 0.07);
 }
 
 .reading-input {
@@ -603,8 +600,7 @@
   font-size: 13px;
   font-weight: 750;
 
-  box-shadow:
-    0 5px 14px rgba(74, 128, 183, 0.18);
+  box-shadow: 0 5px 14px rgba(74, 128, 183, 0.18);
 
   cursor: pointer;
 }
@@ -629,8 +625,7 @@
 
   border-radius: 50%;
 
-  animation:
-    consumo-spin 0.7s linear infinite;
+  animation: consumo-spin 0.7s linear infinite;
 }
 
 /* =========================================
@@ -813,8 +808,7 @@
 
   background: var(--energia-branco);
 
-  box-shadow:
-    0 2px 8px rgba(65, 73, 82, 0.04);
+  box-shadow: 0 2px 8px rgba(65, 73, 82, 0.04);
 }
 
 .history-main {
@@ -911,6 +905,39 @@
   color: var(--energia-marrom);
 
   font-size: 13px;
+}
+
+.history-values {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.history-value {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.history-value span {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #777);
+}
+
+.history-value strong {
+  font-size: 0.95rem;
+}
+
+.history-total strong {
+  color: #16a34a;
+  font-weight: 700;
+}
+
+@media (max-width: 600px) {
+  .history-values {
+    gap: 12px;
+  }
 }
 
 /* =========================================
@@ -1027,8 +1054,7 @@
 
   background: var(--energia-branco);
 
-  box-shadow:
-    0 15px 40px rgba(35, 42, 48, 0.18);
+  box-shadow: 0 15px 40px rgba(35, 42, 48, 0.18);
 }
 
 .energy-confirm-icon {
@@ -1143,8 +1169,7 @@
 
   border-radius: 50%;
 
-  animation:
-    consumo-spin 0.8s linear infinite;
+  animation: consumo-spin 0.8s linear infinite;
 }
 
 @keyframes consumo-spin {

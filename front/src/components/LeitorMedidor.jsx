@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from "react";
 import { createWorker, PSM } from "tesseract.js";
 import "./LeitorMedidor.css";
@@ -31,7 +30,7 @@ export default function LeitorMedidor({ onFechar, onConfirmar }) {
     try {
       if (!navigator.mediaDevices?.getUserMedia) {
         throw new Error(
-          "Câmera indisponível. Abra o sistema em uma conexão HTTPS."
+          "Câmera indisponível. Abra o sistema em uma conexão HTTPS.",
         );
       }
 
@@ -44,13 +43,6 @@ export default function LeitorMedidor({ onFechar, onConfirmar }) {
 
       streamRef.current = stream;
 
-      if (!videoRef.current) {
-        throw new Error("Não foi possível preparar a câmera.");
-      }
-
-      videoRef.current.srcObject = stream;
-      await videoRef.current.play();
-
       setPermissao("autorizada");
       setMensagem("Câmera autorizada! Posicione o medidor na área indicada.");
     } catch (error) {
@@ -58,10 +50,12 @@ export default function LeitorMedidor({ onFechar, onConfirmar }) {
 
       setPermissao("bloqueada");
 
-      if (error.name === "NotAllowedError" ||
-          error.name === "PermissionDeniedError") {
+      if (
+        error.name === "NotAllowedError" ||
+        error.name === "PermissionDeniedError"
+      ) {
         setErro(
-          "O acesso à câmera foi bloqueado. Libere a permissão nas configurações do navegador e tente novamente."
+          "O acesso à câmera foi bloqueado. Libere a permissão nas configurações do navegador e tente novamente.",
         );
       } else if (error.name === "NotFoundError") {
         setErro("Nenhuma câmera foi encontrada neste dispositivo.");
@@ -72,6 +66,27 @@ export default function LeitorMedidor({ onFechar, onConfirmar }) {
       pararCamera();
     }
   }
+
+  // Conecta a câmera depois que o React renderizar o vídeo.
+  useEffect(() => {
+    if (permissao !== "autorizada") return;
+
+    const video = videoRef.current;
+    const stream = streamRef.current;
+
+    if (!video || !stream) return;
+
+    video.srcObject = stream;
+
+    video.play().catch((error) => {
+      console.error("Erro ao iniciar o vídeo:", error);
+      setErro(
+        "A câmera foi autorizada, mas não foi possível iniciar a imagem.",
+      );
+      setPermissao("bloqueada");
+      pararCamera();
+    });
+  }, [permissao]);
 
   // Encerra a câmera e libera a imagem temporária ao fechar.
   useEffect(() => {
@@ -100,26 +115,30 @@ export default function LeitorMedidor({ onFechar, onConfirmar }) {
     const contexto = canvas.getContext("2d");
     contexto.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    canvas.toBlob((blob) => {
-      if (!blob) {
-        setErro("Não foi possível capturar a foto.");
-        return;
-      }
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) {
+          setErro("Não foi possível capturar a foto.");
+          return;
+        }
 
-      const novaFoto = new File([blob], "medidor.jpg", {
-        type: "image/jpeg",
-      });
+        const novaFoto = new File([blob], "medidor.jpg", {
+          type: "image/jpeg",
+        });
 
-      const novaImagem = URL.createObjectURL(novaFoto);
+        const novaImagem = URL.createObjectURL(novaFoto);
 
-      setArquivo(novaFoto);
-      setImagem(novaImagem);
-      setLeitura("");
-      setErro("");
-      setMensagem("");
+        setArquivo(novaFoto);
+        setImagem(novaImagem);
+        setLeitura("");
+        setErro("");
+        setMensagem("");
 
-      pararCamera();
-    }, "image/jpeg", 0.9);
+        pararCamera();
+      },
+      "image/jpeg",
+      0.9,
+    );
   }
 
   // Reconhece os números da foto.
@@ -153,15 +172,15 @@ export default function LeitorMedidor({ onFechar, onConfirmar }) {
         return;
       }
 
-      const numeroEncontrado = numeros.sort(
-        (a, b) => b.length - a.length
-      )[0];
+      const numeroEncontrado = numeros.sort((a, b) => b.length - a.length)[0];
 
       setLeitura(numeroEncontrado.replace(",", "."));
       setMensagem("Leitura reconhecida! Confira o número antes de confirmar.");
     } catch (error) {
       console.error("Erro no reconhecimento:", error);
-      setErro("Não foi possível ler a foto. Tente novamente ou digite o número.");
+      setErro(
+        "Não foi possível ler a foto. Tente novamente ou digite o número.",
+      );
       setMensagem("");
     } finally {
       if (worker) await worker.terminate();
@@ -215,8 +234,8 @@ export default function LeitorMedidor({ onFechar, onConfirmar }) {
         </header>
 
         <p className="leitor-instrucao">
-          Vamos utilizar a câmera para fotografar o medidor e reconhecer
-          os números da leitura.
+          Vamos utilizar a câmera para fotografar o medidor e reconhecer os
+          números da leitura.
         </p>
 
         <div className="leitor-camera">
@@ -253,9 +272,9 @@ export default function LeitorMedidor({ onFechar, onConfirmar }) {
 
         {permissao === "bloqueada" && (
           <p className="leitor-instrucao">
-            Se você já bloqueou o acesso, clique no ícone de configurações
-            ou cadeado ao lado do endereço do site, permita o uso da câmera
-            e tente novamente.
+            Se você já bloqueou o acesso, clique no ícone de configurações ou
+            cadeado ao lado do endereço do site, permita o uso da câmera e tente
+            novamente.
           </p>
         )}
 

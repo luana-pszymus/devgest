@@ -8,13 +8,15 @@ function formatarMoeda(valor) {
 }
 
 // Mostra todas as informações de uma única kitnet.
-function KitnetCard({
-  kitnet,
-  contrato,
-  inquilino,
-  ultimoConsumo,
-}) {
+function KitnetCard({ kitnet, contrato, inquilino, ultimoConsumo }) {
   const ocupada = Boolean(contrato);
+
+  const aluguel = Number(kitnet.valor_aluguel || 0);
+  const energia = Number(ultimoConsumo?.valor_energia || 0);
+
+  const total = ultimoConsumo
+    ? Number(ultimoConsumo.valor_total ?? aluguel + energia)
+    : aluguel;
 
   return (
     <Card className="kitnet-card">
@@ -23,29 +25,18 @@ function KitnetCard({
           <div className="kitnet-icon">⌂</div>
 
           <div>
-            <span className="kitnet-number">
-              KITNET
-            </span>
+            <span className="kitnet-number">KITNET</span>
 
             <h3>
-              {kitnet.numero ||
-                `Kitnet ${String(kitnet.id).padStart(
-                  2,
-                  "0",
-                )}`}
+              {kitnet.numero || `Kitnet ${String(kitnet.id).padStart(2, "0")}`}
             </h3>
           </div>
         </div>
 
         <span
-          className={
-            ocupada
-              ? "occupancy occupied"
-              : "occupancy available"
-          }
+          className={ocupada ? "occupancy occupied" : "occupancy available"}
         >
           <span className="occupancy-dot"></span>
-
           {ocupada ? "Ocupada" : "Disponível"}
         </span>
       </div>
@@ -55,18 +46,12 @@ function KitnetCard({
       <div className="kitnet-info">
         <div className="info-row">
           <span>Aluguel</span>
-
-          <strong>
-            {formatarMoeda(kitnet.valor_aluguel)}
-          </strong>
+          <strong>{formatarMoeda(aluguel)}</strong>
         </div>
 
         <div className="info-row">
           <span>Inquilino</span>
-
-          <strong>
-            {inquilino?.nome || "Nenhum inquilino"}
-          </strong>
+          <strong>{inquilino?.nome || "Nenhum inquilino"}</strong>
         </div>
 
         {ultimoConsumo && (
@@ -79,32 +64,27 @@ function KitnetCard({
             <div className="energy-values">
               <div>
                 <span>Consumo</span>
-
                 <strong>
-                  {Number(
-                    ultimoConsumo.consumo_kwh || 0,
-                  ).toFixed(0)}{" "}
-                  kWh
+                  {Number(ultimoConsumo.consumo_kwh || 0).toFixed(0)} kWh
                 </strong>
               </div>
 
               <div>
                 <span>Energia</span>
-
-                <strong>
-                  {formatarMoeda(
-                    ultimoConsumo.valor_energia,
-                  )}
-                </strong>
+                <strong>{formatarMoeda(energia)}</strong>
               </div>
+            </div>
+
+            <div className="energy-total">
+              <span>Total (aluguel + energia)</span>
+              <strong>{formatarMoeda(total)}</strong>
             </div>
           </div>
         )}
 
         {!ocupada && (
           <div className="available-message">
-            Esta kitnet está disponível para um
-            novo inquilino.
+            Esta kitnet está disponível para um novo inquilino.
           </div>
         )}
       </div>
