@@ -1,14 +1,14 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import Navbar from "../components/Navbar";
 import Botao from "../components/Botao";
 import Loading from "../components/Loading";
-import Mensagem from "../components/Mensagem";
 
 import CabecalhoDashboard from "./CabecalhoDashboard";
 import ResumoDashboard from "./ResumoDashboard";
-import KitnetCard from "./KitnetCard";
+import SecaoKitnets from "./SecaoKitnets";
 import FormularioKitnet from "./FormularioKitnet";
 
 import api from "../services/api";
@@ -112,9 +112,7 @@ export default function Dashboard() {
         error,
       );
 
-      setErro(
-        "Não foi possível carregar os dados.",
-      );
+      setErro("Não foi possível carregar os dados.");
     } finally {
       setCarregando(false);
     }
@@ -126,8 +124,7 @@ export default function Dashboard() {
   function encontrarContrato(kitnetId) {
     return contratos.find(
       (contrato) =>
-        Number(contrato.kitnet_id) ===
-          Number(kitnetId) &&
+        Number(contrato.kitnet_id) === Number(kitnetId) &&
         !contrato.data_fim,
     );
   }
@@ -150,8 +147,7 @@ export default function Dashboard() {
     const registros = consumos
       .filter(
         (consumo) =>
-          Number(consumo.contrato_id) ===
-          Number(contratoId),
+          Number(consumo.contrato_id) === Number(contratoId),
       )
       .sort((a, b) => {
         const anoA = Number(a.ano);
@@ -203,16 +199,12 @@ export default function Dashboard() {
 
     // Validação básica antes de enviar.
     if (!numero) {
-      setErroKitnet(
-        "Informe o número da kitnet.",
-      );
+      setErroKitnet("Informe o número da kitnet.");
       return;
     }
 
     if (!valor || valor <= 0) {
-      setErroKitnet(
-        "Informe um valor de aluguel válido.",
-      );
+      setErroKitnet("Informe um valor de aluguel válido.");
       return;
     }
 
@@ -225,9 +217,7 @@ export default function Dashboard() {
     );
 
     if (numeroJaExiste) {
-      setErroKitnet(
-        "Já existe uma kitnet com esse número.",
-      );
+      setErroKitnet("Já existe uma kitnet com esse número.");
       return;
     }
 
@@ -239,9 +229,7 @@ export default function Dashboard() {
         valor_aluguel: valor,
       });
 
-      setMensagemKitnet(
-        "Kitnet cadastrada com sucesso.",
-      );
+      setMensagemKitnet("Kitnet cadastrada com sucesso.");
 
       setNumeroKitnet("");
       setValorAluguel("");
@@ -291,13 +279,10 @@ export default function Dashboard() {
     totalKitnets - kitnetsOcupadas;
 
   const valorAlugueis = kitnets
-    .filter((kitnet) =>
-      encontrarContrato(kitnet.id),
-    )
+    .filter((kitnet) => encontrarContrato(kitnet.id))
     .reduce(
       (total, kitnet) =>
-        total +
-        Number(kitnet.valor_aluguel || 0),
+        total + Number(kitnet.valor_aluguel || 0),
       0,
     );
 
@@ -310,13 +295,11 @@ export default function Dashboard() {
       Number(consumo.ano) === anoAtual,
   );
 
-  const valorEnergiaMes =
-    consumosMesAtual.reduce(
-      (total, consumo) =>
-        total +
-        Number(consumo.valor_energia || 0),
-      0,
-    );
+  const valorEnergiaMes = consumosMesAtual.reduce(
+    (total, consumo) =>
+      total + Number(consumo.valor_energia || 0),
+    0,
+  );
 
   // ==================== TELA ====================
 
@@ -360,88 +343,18 @@ export default function Dashboard() {
               valorAlugueis={valorAlugueis}
               totalKitnets={totalKitnets}
               kitnetsOcupadas={kitnetsOcupadas}
-              kitnetsDisponiveis={
-                kitnetsDisponiveis
-              }
+              kitnetsDisponiveis={kitnetsDisponiveis}
               valorEnergiaMes={valorEnergiaMes}
             />
 
             {/* Lista de imóveis */}
-            <section className="kitnets-section">
-              <div className="section-heading">
-                <div>
-                  <span className="section-eyebrow">
-                    SEUS IMÓVEIS
-                  </span>
-
-                  <h2>Kitnets</h2>
-                </div>
-
-                <Botao
-                  onClick={abrirFormularioKitnet}
-                >
-                  + Adicionar kitnet
-                </Botao>
-              </div>
-
-              {kitnets.length === 0 ? (
-                // Estado vazio quando ainda não existe nenhuma kitnet.
-                <div className="empty-dashboard">
-                  <div className="empty-icon">
-                    ⌂
-                  </div>
-
-                  <h3>
-                    Nenhuma kitnet cadastrada
-                  </h3>
-
-                  <Mensagem>
-                    Cadastre sua primeira kitnet
-                    para começar.
-                  </Mensagem>
-
-                  <Botao
-                    onClick={
-                      abrirFormularioKitnet
-                    }
-                  >
-                    + Adicionar kitnet
-                  </Botao>
-                </div>
-              ) : (
-                // Cada kitnet recebe seu próprio componente.
-                <div className="kitnet-list">
-                  {kitnets.map((kitnet) => {
-                    const contrato =
-                      encontrarContrato(
-                        kitnet.id,
-                      );
-
-                    const inquilino =
-                      encontrarInquilino(
-                        contrato,
-                      );
-
-                    const ultimoConsumo =
-                      encontrarUltimoConsumo(
-                        contrato?.id,
-                      );
-
-                    return (
-                      <KitnetCard
-                        key={kitnet.id}
-                        kitnet={kitnet}
-                        contrato={contrato}
-                        inquilino={inquilino}
-                        ultimoConsumo={
-                          ultimoConsumo
-                        }
-                      />
-                    );
-                  })}
-                </div>
-              )}
-            </section>
+            <SecaoKitnets
+              kitnets={kitnets}
+              encontrarContrato={encontrarContrato}
+              encontrarInquilino={encontrarInquilino}
+              encontrarUltimoConsumo={encontrarUltimoConsumo}
+              onAdicionarKitnet={abrirFormularioKitnet}
+            />
           </>
         )}
       </main>
