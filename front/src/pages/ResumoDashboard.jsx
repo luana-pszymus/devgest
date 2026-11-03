@@ -1,4 +1,5 @@
 import Card from "../components/Card";
+import "./ResumoDashboard.css";
 
 function formatarMoeda(valor) {
   return Number(valor || 0).toLocaleString("pt-BR", {
