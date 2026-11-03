@@ -95,7 +95,9 @@ function Consulta() {
     return consumos
       .filter((consumo) => {
         if (filtroInquilino) {
-          const contrato = buscarContrato(consumo.contrato_id);
+          const contrato = contratos.find(
+  (item) => Number(item.id) === Number(consumo.contrato_id)
+);
 
           if (Number(contrato?.inquilino_id) !== Number(filtroInquilino)) {
             return false;
